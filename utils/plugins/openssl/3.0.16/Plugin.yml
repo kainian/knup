@@ -1,0 +1,8 @@
+name: openssl
+version: 3.0.16
+abstract: |
+  OpenSSL is a robust, commercial-grade, full-featured Open Source Toolkit 
+  for the TLS (formerly SSL), DTLS and QUIC protocols.
+install:
+  script: |
+    (eval "$(cat "utils/share/openssl/3.0.16")")

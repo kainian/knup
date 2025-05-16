@@ -1,0 +1,1 @@
+install_package "config" "openssl@3.0.16" "https://github.com/openssl/openssl/releases/download/openssl-3.0.16/openssl-3.0.16.tar.gz"

@@ -1,0 +1,7 @@
+name: readline
+version: 8.2.13
+abstract: |
+  Library for editing typed command lines
+install:
+  script: |
+    (eval "$(cat "utils/share/readline/8.2.13")")

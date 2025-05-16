@@ -1,0 +1,41 @@
+name: ruby
+version: 3.4.3
+abstract: |
+  A dynamic, open source programming language with a focus on 
+  simplicity and productivity. It has an elegant syntax that is natural to read
+  and easy to write.
+install:
+  script: |
+    export RUBY_VERSION="ruby-3.4.3"
+    export RBENV_ROOT="${NP_PREFIX}/Cellar/rbenv@1.3.2"
+    export RUBY_BUILD_CACHE_PATH="${RBENV_ROOT}/cache"
+    export PATH="${RBENV_ROOT}/bin:$PATH"
+      
+    eval "$(rbenv init -)"
+    rbenv install $RUBY_VERSION --verbose -- --with-openssl-dir="${NP_PREFIX}/Cellar/openssl@3.0.16" --with-readline-dir="${NP_PREFIX}/Cellar/readline@8.2.13" --with-libyaml-dir="${NP_PREFIX}/Cellar/libyaml@0.2.5" --with-gmp-dir="${NP_PREFIX}/Cellar/gmp@6.3.0"
+
+    execute "ln" "-sf" "${RBENV_ROOT}/versions/${RUBY_VERSION}" "${NP_PREFIX}/Cellar/ruby@3.4.3"
+    
+    rbenv shell $RUBY_VERSION
+    curl -fsSL curl.haxx.se/ca/cacert.pem -o "$(ruby -ropenssl -e 'puts OpenSSL::X509::DEFAULT_CERT_FILE')"
+    curl -Lks 'https://git.io/rg-ssl' | ruby
+init:
+  script: |
+    export RUBY_VERSION="ruby-3.4.3"
+    export RBENV_ROOT="${NP_PREFIX}/Cellar/rbenv@1.3.2"
+    export RUBY_BUILD_CACHE_PATH="${RBENV_ROOT}/cache"
+    export PATH="${RBENV_ROOT}/bin:$PATH"
+    
+    eval "$(rbenv init -)"
+    rbenv shell $RUBY_VERSION
+dependencies:
+  - name: gmp
+    version: 6.3.0
+  - name: libyaml
+    version: 0.2.5
+  - name: openssl
+    version: 3.0.16
+  - name: readline
+    version: 8.2.13
+  - name: rbenv
+    version: 1.3.2

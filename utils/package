@@ -1,0 +1,111 @@
+#!/bin/bash
+
+set -eu
+
+http_head_curl() {
+  # shellcheck disable=SC2086
+  curl -qsILf "$1" >/dev/null
+}
+
+http_get_curl() {
+  # shellcheck disable=SC2086
+  execute curl -q -fL -o "$2" "$1"
+}
+
+http() {
+  local method="$1"
+  [ -n "$2" ] || return 1
+  shift 1
+
+  # http_get_curl, http_get_wget, etc.
+  "http_${method}_curl" "$@"
+}
+
+fetch_tarball() {
+  local package_name="$1"
+  local package_url="$2"
+  local tar_args="xzf"
+
+  if [ "$package_url" != "${package_url%bz2}" ]; then
+    if ! type -p bzip2 >/dev/null; then
+      echo "warning: bzip2 not found; consider installing the \`bzip2\` package" >&2
+    fi
+    package_filename="${package_filename%.gz}.bz2"
+    tar_args="${tar_args/z/j}"
+  fi
+
+  local package_filename="${package_name}.tar.gz"
+
+  local tarball_filename
+  tarball_filename="$(basename "$package_url")"
+  ohai "Downloading ${tarball_filename}..."
+  http head "$package_url" || abort "Failed to download ${tarball_filename}"
+  http get "$package_url" "$package_filename"
+  execute tar "$tar_args" "$package_filename"
+
+  if [ ! -d "$package_name" ]; then
+    extracted_dir="$(find_extracted_directory)"
+    execute mv "$extracted_dir" "$package_name"
+  fi
+}
+
+find_extracted_directory() {
+  for f in *; do
+    if [ -d "$f" ]; then
+      echo "$f"
+      return
+    fi
+  done
+  abort "Extracted directory not found"
+}
+
+install_package_using() {
+  local package_type="$1"
+  local config="$2"
+  local package_name="$3"
+  
+  ohai "Install ${package_name}..."
+  shift 2 && "fetch_${package_type}" "$@"
+  execute "${MKDIR[@]}" "build" && cd "build"
+  "../${package_name}/${config}" "--prefix=${NP_PREFIX}/Cellar/${package_name}"
+  execute make -j "$(sysctl -n hw.ncpu)"
+  execute make install
+}
+
+install_package() {
+  cd "$(mktemp -d)"
+  install_package_using "tarball" "$@"
+}
+
+install_rbenv_using() {
+  local package_type="$1"
+  local package_name="$2"
+  ohai "Install ${package_name}..."
+  
+  cd "$(mktemp -d)"
+  shift 1 && "fetch_${package_type}" "$@"
+  package_url="$(pwd)/${package_name}"
+}
+
+install_rbenv() {
+  install_rbenv_using "tarball" "$1" "$2"
+  rbenv_path="$package_url"
+  install_rbenv_using "tarball" "$3" "$4"
+  ruby_build_path="$package_url"
+
+  "${MKDIR[@]}" "$rbenv_path/plugins"
+  rm -rf "$rbenv_path/plugins/ruby-build"
+  mv "$ruby_build_path" "$rbenv_path/plugins/ruby-build"
+
+  "${MKDIR[@]}" "$rbenv_path/cache" && cd "$rbenv_path/cache"
+  http get "https://cache.ruby-lang.org/pub/ruby/3.4/ruby-3.4.3.tar.gz" "ruby-3.4.3.tar.gz"
+  http get "https://cache.ruby-lang.org/pub/ruby/3.4/ruby-3.4.4.tar.gz" "ruby-3.4.4.tar.gz"
+  http get "https://github.com/openssl/openssl/releases/download/openssl-3.0.16/openssl-3.0.16.tar.gz" "openssl-3.0.16.tar.gz"
+  http get "https://www.openssl.org/source/openssl-1.1.1w.tar.gz" "openssl-1.1.1w.tar.gz"
+  http get "https://cache.ruby-lang.org/pub/ruby/2.7/ruby-2.7.8.tar.gz" "ruby-2.7.8.tar.gz"
+  
+  rm -rf "${NP_PREFIX}/Cellar/$1"
+  mv "$rbenv_path" "${NP_PREFIX}/Cellar/$1"
+}
+
+##################### END OF FUNCTIONS #####################

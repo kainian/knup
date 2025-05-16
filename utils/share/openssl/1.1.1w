@@ -1,0 +1,1 @@
+install_package "config" "openssl@1.1.1w" "https://www.openssl.org/source/openssl-1.1.1w.tar.gz"

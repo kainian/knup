@@ -1,0 +1,7 @@
+name: libyaml
+version: 0.2.5
+abstract: |
+  Canonical source repository for LibYAML
+install:
+  script: |
+    (eval "$(cat "utils/share/libyaml/0.2.5")")
