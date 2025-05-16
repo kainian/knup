@@ -4,7 +4,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "npup",
+    name: "NextPangeaSetup",
     platforms: [
         .macOS(.v13)
     ],

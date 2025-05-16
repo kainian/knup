@@ -1,6 +1,6 @@
 //
 //  PluginYml.swift
-//  npup
+//  NextPangeaSetup
 //
 //  Created by Jonathan Lee on 5/16/25.
 //
