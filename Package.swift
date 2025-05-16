@@ -5,20 +5,50 @@ import PackageDescription
 
 let package = Package(
     name: "npup",
+    platforms: [
+        .macOS(.v13)
+    ],
     products: [
-        // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
+            name: "NPSandbox",
+            targets: [
+                "NPSandbox"
+            ]),
+        .library(
+            name: "NPInstaller",
+            targets: [
+                "NPInstaller"
+            ]),
+        .executable(
             name: "npup",
-            targets: ["npup"]),
+            targets: [
+                "NPSetup"
+            ])
+    ],
+    dependencies: [
+        .package(url: "https://github.com/swiftlang/swift-tools-support-core.git", branch: "main"),
+        .package(url: "https://github.com/apple/swift-argument-parser.git", branch: "main"),
+        .package(url: "https://github.com/jpsim/Yams.git", exact: "5.4.0"),
     ],
     targets: [
-        // Targets are the basic building blocks of a package, defining a module or a test suite.
-        // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "npup"),
-        .testTarget(
-            name: "npupTests",
-            dependencies: ["npup"]
-        ),
+            name: "NPSandbox",
+            dependencies: [
+                .product(name: "Yams", package: "Yams"),
+                .product(name: "TSCBasic", package: "swift-tools-support-core"),
+            ]),
+        .target(
+            name: "NPInstaller",
+            dependencies: [
+                "NPSandbox",
+                .product(name: "Yams", package: "Yams"),
+                .product(name: "TSCBasic", package: "swift-tools-support-core"),
+            ]),
+        .executableTarget(
+            name: "NPSetup",
+            dependencies: [
+                "NPInstaller",
+                .product(name: "ArgumentParser", package: "swift-argument-parser")
+            ]),
     ]
 )
