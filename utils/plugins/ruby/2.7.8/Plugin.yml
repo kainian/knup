@@ -28,6 +28,25 @@ init:
     
     eval "$(rbenv init -)"
     rbenv shell $RUBY_VERSION
+commands:
+  - name: ruby
+    command: bin/ruby
+    description: |
+      Ruby is a dynamic, open source programming language with a focus on 
+      simplicity and productivity. It has an elegant syntax that is natural to read
+      and easy to write.
+  - name: gem
+    command: bin/gem
+    description: |
+      Gem is a package manager for Ruby applications and libraries.
+  - name: bundle
+    command: bin/bundle
+    description: |
+      Bundler manages application dependencies for Ruby applications.
+  - name: irb
+    command: bin/irb
+    description: |
+      Interactive Ruby (IRB) is a REPL (Read-Eval-Print Loop) for Ruby.
 dependencies:
   - name: gmp
     version: 6.3.0

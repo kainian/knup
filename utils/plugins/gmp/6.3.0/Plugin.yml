@@ -1,5 +1,6 @@
 name: gmp
 version: 6.3.0
+multiVersionEnabled: true
 abstract: |
   GNU MP is a portable library written in C for arbitrary precision
   arithmetic on integers, rational numbers, and floating-point numbers. It aims

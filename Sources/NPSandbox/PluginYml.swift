@@ -8,8 +8,8 @@
 import struct TSCBasic.RelativePath
 import class Yams.YAMLDecoder
 
-public struct PluginYml: Codable {
-    public struct Dependency: Codable {
+public struct PluginYml: Codable, Sendable {
+    public struct Dependency: Codable, Sendable {
         public let name: String
         public let version: String
         public init(_ name: String, _ version: String) {
@@ -17,15 +17,28 @@ public struct PluginYml: Codable {
             self.version = version
         }
     }
-    public struct Script: Codable {
+    public struct Script: Codable, Sendable {
         public let script: String?
     }
     public let name: String
     public let version: String
+    public let multiVersionEnabled: Bool?
     public let abstract: String?
     public let dependencies: [Dependency]?
     public let install: Script?
     public let `init`: Script?
+}
+
+extension PluginYml: Hashable {
+    
+    public static func == (lhs: PluginYml, rhs: PluginYml) -> Bool {
+        lhs.name == rhs.name && lhs.version == rhs.version
+    }
+    
+    public func hash(into hasher: inout Hasher) {
+        name.hash(into: &hasher)
+        version.hash(into: &hasher)
+    }
 }
 
 extension Sandbox {

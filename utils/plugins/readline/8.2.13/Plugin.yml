@@ -1,5 +1,6 @@
 name: readline
 version: 8.2.13
+multiVersionEnabled: true
 abstract: |
   Library for editing typed command lines
 install:

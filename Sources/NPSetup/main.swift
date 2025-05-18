@@ -7,5 +7,11 @@
 
 import NPInstaller
 
-let installer = Installer()
-try installer.install(name: "ruby", version: "3.4.3")
+do {
+    let installer = Installer()
+    try installer.append(.init("ruby", "2.7.8"))
+    try installer.append(.init("ruby", "3.4.3"))
+    try installer.install()
+} catch {
+    print(error)
+}
