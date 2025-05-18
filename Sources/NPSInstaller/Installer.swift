@@ -5,7 +5,7 @@
 //  Created by Jonathan Lee on 5/16/25.
 //
 
-import NPSandbox
+import NPSCore
 import class TSCBasic.Process
 import class TSCBasic.DiagnosticsEngine
 
@@ -21,26 +21,6 @@ public final class Installer {
     }
 }
 
-extension PluginYml: NodeHashable {
-    
-    public var key: String {
-        "\(name)@\(version)"
-    }
-    
-    public var children: [PluginYml] {
-        get throws {
-            let sandbox = Sandbox.shared
-            return try dependencies?.map {
-                try sandbox.plugin(dependency: $0)
-            } ?? []
-        }
-    }
-    
-    public static func == (lhs: PluginYml, rhs: PluginYml) -> Bool {
-        lhs.key == rhs.key
-    }
-}
-
 extension Installer {
 
     public func append(_ dependency: PluginYml.Dependency) throws {
@@ -49,6 +29,8 @@ extension Installer {
     
     public func install() throws {
         let result = try directedGraph.resolve()
+        
+        
         print(result)
     }
 //    

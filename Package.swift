@@ -10,14 +10,14 @@ let package = Package(
     ],
     products: [
         .library(
-            name: "NPSandbox",
+            name: "NPSCore",
             targets: [
-                "NPSandbox"
+                "NPSCore"
             ]),
         .library(
-            name: "NPInstaller",
+            name: "NPSInstaller",
             targets: [
-                "NPInstaller"
+                "NPSInstaller"
             ]),
         .executable(
             name: "npup",
@@ -32,22 +32,22 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "NPSandbox",
+            name: "NPSCore",
             dependencies: [
                 .product(name: "Yams", package: "Yams"),
                 .product(name: "TSCBasic", package: "swift-tools-support-core"),
             ]),
         .target(
-            name: "NPInstaller",
+            name: "NPSInstaller",
             dependencies: [
-                "NPSandbox",
+                "NPSCore",
                 .product(name: "Yams", package: "Yams"),
                 .product(name: "TSCBasic", package: "swift-tools-support-core"),
             ]),
         .executableTarget(
             name: "NPSetup",
             dependencies: [
-                "NPInstaller",
+                "NPSInstaller",
                 .product(name: "ArgumentParser", package: "swift-argument-parser")
             ]),
     ]

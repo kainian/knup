@@ -41,6 +41,22 @@ extension PluginYml: Hashable {
     }
 }
 
+extension PluginYml: NodeHashable {
+    
+    public var key: String {
+        "\(name)@\(version)"
+    }
+    
+    public var children: [PluginYml] {
+        get throws {
+            let sandbox = Sandbox.shared
+            return try dependencies?.map {
+                try sandbox.plugin(dependency: $0)
+            } ?? []
+        }
+    }
+}
+
 extension Sandbox {
     
     private func relativePath(_ dependency: PluginYml.Dependency) throws -> RelativePath {

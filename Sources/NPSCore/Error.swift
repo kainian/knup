@@ -5,8 +5,6 @@
 //  Created by Jonathan Lee on 5/17/25.
 //
 
-import NPSandbox
-
 public enum Error: Swift.Error {
  
     case dependency(Dependency)
