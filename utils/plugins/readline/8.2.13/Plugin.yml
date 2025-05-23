@@ -3,6 +3,7 @@ version: 8.2.13
 multiVersionEnabled: true
 abstract: |
   Library for editing typed command lines
-install:
-  script: |
-    (eval "$(cat "utils/share/readline/8.2.13")")
+provisions:
+  - name: make
+    script: |
+      (eval "$(cat "utils/share/readline/8.2.13")")

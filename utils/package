@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eu
+set -u
 
 http_head_curl() {
   # shellcheck disable=SC2086
@@ -67,7 +67,7 @@ install_package_using() {
   ohai "Install ${package_name}..."
   shift 2 && "fetch_${package_type}" "$@"
   execute "${MKDIR[@]}" "build" && cd "build"
-  "../${package_name}/${config}" "--prefix=${NP_PREFIX}/Cellar/${package_name}"
+  "../${package_name}/${config}" "--prefix=${NEXT_PREFIX}/Cellar/${package_name}"
   execute make -j "$(sysctl -n hw.ncpu)"
   execute make install
 }
@@ -104,8 +104,8 @@ install_rbenv() {
   http get "https://www.openssl.org/source/openssl-1.1.1w.tar.gz" "openssl-1.1.1w.tar.gz"
   http get "https://cache.ruby-lang.org/pub/ruby/2.7/ruby-2.7.8.tar.gz" "ruby-2.7.8.tar.gz"
   
-  rm -rf "${NP_PREFIX}/Cellar/$1"
-  mv "$rbenv_path" "${NP_PREFIX}/Cellar/$1"
+  rm -rf "${NEXT_PREFIX}/Cellar/$1"
+  mv "$rbenv_path" "${NEXT_PREFIX}/Cellar/$1"
 }
 
 ##################### END OF FUNCTIONS #####################

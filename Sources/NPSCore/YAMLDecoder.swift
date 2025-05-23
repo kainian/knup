@@ -12,16 +12,20 @@ import class Yams.YAMLDecoder
 
 extension YAMLDecoder {
     
-    public static func decode<T>(_ type: T.Type, from path: AbsolutePath) throws -> T where T: Decodable {
+    public static func decode<T>(_ type: T.Type, from absolutePath: AbsolutePath) throws -> T where T: Decodable {
 //        guard localFileSystem.exists(path) else {
 //            throw Error.yaml(.notExists(path))
 //        }
 //        guard localFileSystem.isFile(path) else {
 //            throw Error.yaml(.noSuchFile(path))
 //        }
-        let path = path.pathString
-        let url = URL(fileURLWithPath: path)
+        let pathString = absolutePath.pathString
+        let url = URL(fileURLWithPath: pathString)
         let data = try Data(contentsOf: url)
-        return try YAMLDecoder().decode(type, from: data)
+        do {
+            return try YAMLDecoder().decode(type, from: data)
+        } catch {
+            throw Error.yaml(.decode(absolutePath, error))
+        }
     }
 }

@@ -3,6 +3,7 @@ version: 0.2.5
 multiVersionEnabled: true
 abstract: |
   Canonical source repository for LibYAML
-install:
-  script: |
-    (eval "$(cat "utils/share/libyaml/0.2.5")")
+provisions:
+  - name: make
+    script: |
+      (eval "$(cat "utils/share/libyaml/0.2.5")")

@@ -6,6 +6,7 @@ abstract: |
   arithmetic on integers, rational numbers, and floating-point numbers. It aims
   to provide the fastest possible arithmetic for all applications that need 
   higher precision than is directly supported by the basic C types.
-install:
-  script: |
-    (eval "$(cat "utils/share/gmp/6.3.0")")
+provisions:
+  - name: make
+    script: |
+      (eval "$(cat "utils/share/gmp/6.3.0")")

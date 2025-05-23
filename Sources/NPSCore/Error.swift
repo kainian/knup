@@ -5,16 +5,24 @@
 //  Created by Jonathan Lee on 5/17/25.
 //
 
+import struct TSCBasic.AbsolutePath
+
 public enum Error: Swift.Error {
- 
+    
+    case yaml(Yaml)
+    
     case dependency(Dependency)
 }
 
 extension Error {
     
-    public enum Dependency : Sendable {
-        case circular([any NodeHashable])
-        case conflict([String: [[any NodeHashable]]])
+    public enum Yaml: Sendable {
+        case decode(AbsolutePath, Swift.Error)
+    }
+    
+    public enum Dependency: Sendable {
+        case circular([PluginYml])
+        case conflict([String: [[PluginYml]]])
     }
 }
 
@@ -24,6 +32,8 @@ extension Error: CustomStringConvertible {
         switch self {
         case .dependency(let dependency):
             return dependency.description
+        case .yaml(let yaml):
+            return yaml.description
         }
     }
 }
@@ -58,6 +68,19 @@ extension Error.Dependency: CustomStringConvertible {
                 \(body)
                 """
             }.joined(separator: "\n")
+        }
+    }
+}
+
+extension Error.Yaml: CustomStringConvertible {
+    
+    public var description: String {
+        switch self {
+        case .decode(let path, let error):
+            return """
+                path: \(path.prettyPath())
+                \(error)
+                """
         }
     }
 }

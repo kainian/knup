@@ -11,7 +11,7 @@ import enum TSCBasic.ProcessEnv
 import struct TSCBasic.AbsolutePath
 import struct TSCBasic.RelativePath
 
-public final class Sandbox {
+public final class Sandbox: Sendable {
     
     public let home: AbsolutePath
     
@@ -22,7 +22,7 @@ public final class Sandbox {
     
     private init() {
         fileSystem = localFileSystem
-        if let path = ProcessEnv.block[.init("NP_PREFIX")] {
+        if let path = ProcessEnv.block[.init("NEXT_PREFIX")] {
             home = try! .init(validating: path)
         } else {
             home = try! .init(validating: "/opt/np")
@@ -31,10 +31,10 @@ public final class Sandbox {
         let relativePath = try! RelativePath(validating: "Workspace/nextpangea/npup")
         bundle = try! fileSystem.homeDirectory.appending(relativePath)
         #else
-        if let path = ProcessEnv.block[.init("NP_REPOSITORY")] {
+        if let path = ProcessEnv.block[.init("NEXT_REPOSITORY")] {
             bundle = try! .init(validating: path)
         } else {
-            bundle = root.appending(component: ".npup")
+            bundle = home.appending(component: ".npup")
         }
         #endif
     }
@@ -42,20 +42,74 @@ public final class Sandbox {
 
 extension Sandbox {
     
-    public func installed(_ dependency: PluginYml.Dependency) -> Bool {
-        let dirname = "\(dependency.name)@\(dependency.version)"
-        if fileSystem.isDirectory(home.appending(components: ["Cellar", dirname])) {
-            return true
-        } else if fileSystem.isDirectory(home.appending(components: ["Caskroom", dirname])) {
-            return true
+    public func installed(_ plugin: PluginYml) -> Bool {
+        return installed(.init(plugin.name, plugin.version), plugin.rubygems)
+    }
+    
+    public func installed(_ dependency: PluginYml.Dependency, _ rubygems: Bool = false) -> Bool {
+        if rubygems {
+            return fileSystem.isFile(gemfilelockPath(dependency))
         } else {
-            return false
+            if fileSystem.isDirectory(cellarPath(dependency)) {
+                return true
+            } else if fileSystem.isDirectory(caskroomPath(dependency)) {
+                return true
+            } else {
+                return false
+            }
         }
     }
 }
 
 extension Sandbox {
     
-    nonisolated(unsafe) public static let shared: Sandbox = .init()
+    public static let shared: Sandbox = .init()
     
+    public func dirname(_ plugin: PluginYml) -> String {
+        return dirname(.init(plugin.name, plugin.version))
+    }
+    
+    public func dirname(_ dependency: PluginYml.Dependency) -> String {
+        return "\(dependency.name)@\(dependency.version)"
+    }
+    
+    public func cellarPath(_ plugin: PluginYml) -> AbsolutePath {
+        return cellarPath(.init(plugin.name, plugin.version))
+    }
+    
+    public func cellarPath(_ dependency: PluginYml.Dependency) -> AbsolutePath {
+        return home.appending(components: ["Cellar", dirname(dependency)])
+    }
+    
+    public func caskroomPath(_ plugin: PluginYml) -> AbsolutePath {
+        return cellarPath(.init(plugin.name, plugin.version))
+    }
+    
+    public func caskroomPath(_ dependency: PluginYml.Dependency) -> AbsolutePath {
+        return home.appending(components: ["Caskroom", dirname(dependency)])
+    }
+    
+    public func gemsPath(_ plugin: PluginYml) -> AbsolutePath {
+        return gemsPath(.init(plugin.name, plugin.version))
+    }
+    
+    public func gemsPath(_ dependency: PluginYml.Dependency) -> AbsolutePath {
+        return home.appending(components: ["Gems", dirname(dependency)])
+    }
+    
+    public func gemfilePath(_ plugin: PluginYml) -> AbsolutePath {
+        gemfilePath(.init(plugin.name, plugin.version))
+    }
+    
+    public func gemfilePath(_ dependency: PluginYml.Dependency) -> AbsolutePath {
+        return gemsPath(dependency).appending(component: "Gemfile")
+    }
+    
+    public func gemfilelockPath(_ plugin: PluginYml) -> AbsolutePath {
+        gemfilelockPath(.init(plugin.name, plugin.version))
+    }
+    
+    public func gemfilelockPath(_ dependency: PluginYml.Dependency) -> AbsolutePath {
+        return gemsPath(dependency).appending(component: "Gemfile.lock")
+    }
 }

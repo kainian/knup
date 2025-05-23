@@ -11,15 +11,15 @@ source utils/setup
 directories=(
   .npup
   bin etc lib sbin share var opt
-  Cellar Caskroom Frameworks
+  Cellar Caskroom Frameworks Gems
 )
 
 mkdirs=()
 for dir in "${directories[@]}"
 do
-  if ! [[ -d "${NP_PREFIX}/${dir}" ]]
+  if ! [[ -d "${NEXT_PREFIX}/${dir}" ]]
   then
-    mkdirs+=("${NP_PREFIX}/${dir}")
+    mkdirs+=("${NEXT_PREFIX}/${dir}")
   fi
 done
 
@@ -31,21 +31,21 @@ then
   execute_sudo "${CHGRP[@]}" "${GROUP}" "${mkdirs[@]}"
 fi
 
-if ! [[ -d "${NP_REPOSITORY}" ]]
+if ! [[ -d "${NEXT_REPOSITORY}" ]]
 then
-  execute_sudo "${MKDIR[@]}" "${NP_REPOSITORY}"
+  execute_sudo "${MKDIR[@]}" "${NEXT_REPOSITORY}"
 fi
-execute_sudo "${CHOWN[@]}" "-R" "${USER}:${GROUP}" "${NP_REPOSITORY}"
+execute_sudo "${CHOWN[@]}" "-R" "${USER}:${GROUP}" "${NEXT_REPOSITORY}"
 
 ohai "Downloading and installing NextPangea..."
 (
-    cd "${NP_REPOSITORY}" >/dev/null || return
+    cd "${NEXT_REPOSITORY}" >/dev/null || return
 
     # we do it in four steps to avoid merge errors when reinstalling
     execute "git" "-c" "init.defaultBranch=master" "init" "--quiet"
 
     # "git remote add" will fail if the remote is defined in the global config
-    execute "git" "config" "remote.origin.url" "${NP_GIT_REMOTE}"
+    execute "git" "config" "remote.origin.url" "${NEXT_GIT_REMOTE}"
     execute "git" "config" "remote.origin.fetch" "+refs/heads/*:refs/remotes/origin/*"
 
     # ensure we don't munge line endings on checkout
@@ -72,11 +72,11 @@ ohai "Downloading and installing NextPangea..."
     fi
     execute "git" "checkout" "--quiet" "--force" "-B" "stable" "${LATEST_GIT_TAG}"
 
-    if [[ "${NP_REPOSITORY}" != "${NP_PREFIX}" ]]
+    if [[ "${NEXT_REPOSITORY}" != "${NEXT_PREFIX}" ]]
     then
-        if [[ "${NP_REPOSITORY}" == "${NP_PREFIX}/np" ]]
+        if [[ "${NEXT_REPOSITORY}" == "${NEXT_PREFIX}/np" ]]
         then
-        execute "ln" "-sf" "../np/bin/np" "${NP_PREFIX}/bin/np"
+        execute "ln" "-sf" "../np/bin/np" "${NEXT_PREFIX}/bin/np"
         else
         abort "The np repository should be placed in the np prefix directory."
         fi

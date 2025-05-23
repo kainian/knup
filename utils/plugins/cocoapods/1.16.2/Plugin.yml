@@ -1,0 +1,57 @@
+name: cocoapods
+version: 1.16.2
+abstract: |
+  CocoaPods manages library dependencies for your Xcode project. You specify
+  the dependencies for your project in one easy text file. CocoaPods resolves
+  dependencies between libraries, fetches source code for the dependencies, 
+  and creates and maintains an Xcode workspace to build your project. Ultimately, 
+  the goal is to improve discoverability of, and engagement in, third party 
+  open-source libraries, by creating a more centralized ecosystem.
+bootstraps:
+  - name: init
+    script: |
+        export GEM_HOME="$NEXT_PREFIX/Gems/cocoapods@1.16.2"
+        export GEM_PATH="$NEXT_PREFIX/Gems/cocoapods@1.16.2"
+        export BUNDLE_GEMFILE="$GEM_HOME/Gemfile"
+    prepare:
+      - plugin: ruby
+        name: shell
+provisions:
+  - name: install
+    script: |
+        ${RBENV_ROOT}/shims/bundle install
+    prepare:
+      - plugin: ruby
+        name: shell
+      - plugin: cocoapods
+        name: init
+doctors:
+  - name: install
+    script: |
+      ${RBENV_ROOT}/shims/bundle install
+    prepare:
+      - plugin: ruby
+        name: shell
+  - name: check
+    script: |
+      ${RBENV_ROOT}/shims/bundle install check
+commands:
+  - name: ruby
+    command: bin/ruby
+    description: |
+      Ruby is a dynamic, open source programming language with a focus on 
+      simplicity and productivity. It has an elegant syntax that is natural to read
+      and easy to write.
+gems:
+  - name: cocoapods 
+    version: 1.16.2
+    source: https://rubygems.org
+  - name: cocoapods-core
+    version: 1.16.2
+    source: https://rubygems.org
+  - name: xcodeproj
+    version: 1.27.0
+    source: https://rubygems.org
+dependencies:
+  - name: ruby
+    version: 3.4.3
