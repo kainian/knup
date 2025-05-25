@@ -24,19 +24,21 @@ public final class DirectedGraph {
         
         public let nodeByKey: [String: Node]
         
-        public let dependencies: [Node]
+        public let dependencies: Set<Node>
         
-        public let bootstraps: [String: [String: PluginYml.Script]]
+        public let plugins: Set<PluginYml>
         
-        init(_ nodeByKey: [String : Node], _ dependencies: [Node]) {
+        public let bootstraps: [String: [String: ScriptYml]]
+        
+        init(_ nodeByKey: [String : Node], _ dependencies: Set<Node>) {
             self.nodeByKey = nodeByKey
             self.dependencies = dependencies
-            
-            self.bootstraps = Set(nodeByKey.values).reduce(into: [String: [String: PluginYml.Script]]()) { partialResult, node in
-                let key = node.plugin.key
-                let name = node.plugin.name
-                if let bootstraps = node.plugin.bootstraps {
-                    partialResult[key] = bootstraps.reduce(into: [String: PluginYml.Script]()) { partialResult, script in
+            self.plugins = Set(nodeByKey.values.map(\.plugin))
+            self.bootstraps = Set(self.plugins).reduce(into: [String: [String: ScriptYml]]()) { partialResult, plugin in
+                let key = plugin.key
+                let name = plugin.name
+                if let bootstraps = plugin.bootstraps {
+                    partialResult[key] = bootstraps.reduce(into: [String: ScriptYml]()) { partialResult, script in
                         if let name = script.name {
                             partialResult[name] = script
                         }
@@ -76,8 +78,8 @@ extension DirectedGraph {
     }
     
     public func resolve() throws -> Result {
-        let nodes = plugins.map(Node.init)
         var nodeByKey = [String: Node]()
+        let nodes = Set(plugins.map(Node.init))
         for node in nodes {
             try expansion(node, &nodeByKey)
         }
@@ -87,15 +89,13 @@ extension DirectedGraph {
         if let path = hasConflict(nodes, nodeByKey) {
             throw Error.dependency(.conflict(path))
         }
-        
-        
         return .init(nodeByKey, nodes)
     }
 }
 
 extension DirectedGraph {
     
-    private func hasCycle(_ nodes: [Node]) -> [PluginYml]? {
+    private func hasCycle(_ nodes: Set<Node>) -> [PluginYml]? {
         
         func dfs(_ node: Node, _ path: [PluginYml] = []) -> [PluginYml]? {
             let newPath = path + [node.plugin]
@@ -120,7 +120,7 @@ extension DirectedGraph {
         return nil
     }
     
-    private func hasConflict(_ nodes: [Node], _ nodeByKey: [String: Node]) -> [String: [[PluginYml]]]? {
+    private func hasConflict(_ nodes: Set<Node>, _ nodeByKey: [String: Node]) -> [String: [[PluginYml]]]? {
         
         func find(_ node: Node, name: String, _ path: [PluginYml] = [], handle: ([PluginYml]) -> Void) {
             let path = path + [node.plugin]
@@ -211,9 +211,14 @@ extension DirectedGraph.Result {
         }
     }
     
+    public func first(where predicate: (DirectedGraph.Node) throws -> Bool) rethrows -> DirectedGraph.Node? {
+        return try Set(nodeByKey.values).first(where: predicate)
+    }
+    
     public func provision(_ plugin: PluginYml) -> String {
         
-        func recursion(key: String, _ script: PluginYml.Script, _ initialized: inout Set<PluginYml.Script>, _ contents: inout [String]) {
+        func recursion(key: String, _ script: ScriptYml, _ initialized: inout Set<ScriptYml>, _ contents: inout [String]) {
+            
             if initialized.contains(script) {
                 return
             } else {
@@ -245,7 +250,7 @@ extension DirectedGraph.Result {
             return "# nothing"
         }
         
-        var initialized = Set<PluginYml.Script>()
+        var initialized = Set<ScriptYml>()
         var contents: [String] = .init()
         for provision in provisions {
             recursion(key: plugin.name, provision, &initialized, &contents)

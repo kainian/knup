@@ -1,0 +1,12 @@
+env: 
+  - key: MY_ENV_VAR
+    value: "Hello, World!"
+script:
+  script: |
+    echo "?"
+  prepare:
+    - plugin: ruby
+      name: init
+plugins: 
+  - name: cocoapods
+    version: 1.16.2

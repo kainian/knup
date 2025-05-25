@@ -1,9 +1,10 @@
 name: libyaml
 version: 0.2.5
+type: cellar
 multiVersionEnabled: true
 abstract: |
   Canonical source repository for LibYAML
 provisions:
   - name: make
     script: |
-      (eval "$(cat "utils/share/libyaml/0.2.5")")
+      (eval "$(cat "${NEXT_REPOSITORY}/utils/share/libyaml/0.2.5")")

@@ -1,5 +1,6 @@
 name: gmp
 version: 6.3.0
+type: cellar
 multiVersionEnabled: true
 abstract: |
   GNU MP is a portable library written in C for arbitrary precision
@@ -9,4 +10,4 @@ abstract: |
 provisions:
   - name: make
     script: |
-      (eval "$(cat "utils/share/gmp/6.3.0")")
+      (eval "$(cat "${NEXT_REPOSITORY}/utils/share/gmp/6.3.0")")

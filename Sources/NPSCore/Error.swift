@@ -12,17 +12,24 @@ public enum Error: Swift.Error {
     case yaml(Yaml)
     
     case dependency(Dependency)
+    
+    case process(Process)
 }
 
 extension Error {
     
     public enum Yaml: Sendable {
-        case decode(AbsolutePath, Swift.Error)
+        case decode(String, Swift.Error)
     }
     
     public enum Dependency: Sendable {
         case circular([PluginYml])
         case conflict([String: [[PluginYml]]])
+    }
+    
+    public enum Process: Sendable {
+        case terminated(Int32)
+        case signalled(Int32)
     }
 }
 
@@ -34,6 +41,8 @@ extension Error: CustomStringConvertible {
             return dependency.description
         case .yaml(let yaml):
             return yaml.description
+        case .process(let process):
+            return process.description
         }
     }
 }
@@ -76,11 +85,23 @@ extension Error.Yaml: CustomStringConvertible {
     
     public var description: String {
         switch self {
-        case .decode(let path, let error):
+        case .decode(let string, let error):
             return """
-                path: \(path.prettyPath())
+                \(string)
                 \(error)
                 """
+        }
+    }
+}
+
+extension Error.Process: CustomStringConvertible {
+    
+    public var description: String {
+        switch self {
+        case .terminated(let code):
+            return "terminated(\(code))"
+        case .signalled(let signal):
+            return "signalled(\(signal))"
         }
     }
 }

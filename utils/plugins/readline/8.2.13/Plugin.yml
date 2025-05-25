@@ -1,9 +1,10 @@
 name: readline
 version: 8.2.13
+type: cellar
 multiVersionEnabled: true
 abstract: |
   Library for editing typed command lines
 provisions:
   - name: make
     script: |
-      (eval "$(cat "utils/share/readline/8.2.13")")
+      (eval "$(cat "${NEXT_REPOSITORY}/utils/share/readline/8.2.13")")

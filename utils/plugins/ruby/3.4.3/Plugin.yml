@@ -1,5 +1,6 @@
 name: ruby
 version: 3.4.3
+type: cellar
 abstract: |
   A dynamic, open source programming language with a focus on 
   simplicity and productivity. It has an elegant syntax that is natural to read

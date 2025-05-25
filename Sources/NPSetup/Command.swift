@@ -12,7 +12,8 @@ struct Command: ParsableCommand {
     static let configuration: CommandConfiguration = .init(
         abstract: "The Plugin Manager",
         subcommands: [
-            Install.self
+            Install.self,
+            Bundle.self
         ]
     )
 }

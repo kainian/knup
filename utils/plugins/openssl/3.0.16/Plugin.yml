@@ -1,5 +1,6 @@
 name: openssl
 version: 3.0.16
+type: cellar
 multiVersionEnabled: true
 abstract: |
   OpenSSL is a robust, commercial-grade, full-featured Open Source Toolkit 
@@ -7,4 +8,4 @@ abstract: |
 provisions:
   - name: make
     script: |
-      (eval "$(cat "utils/share/openssl/3.0.16")")
+      (eval "$(cat "${NEXT_REPOSITORY}/utils/share/openssl/3.0.16")")

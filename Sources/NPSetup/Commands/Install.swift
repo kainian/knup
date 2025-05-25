@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  Install.swift
 //  NextPangeaSetup
 //
 //  Created by Jonathan Lee on 5/23/25.
@@ -7,6 +7,7 @@
 
 import ArgumentParser
 import NPSInstaller
+import NPSCore
 
 extension Command {
     
@@ -29,26 +30,9 @@ extension Command {
         var verbose = false
         
         func run() throws {
-            
-    //        import NPSInstaller
-    //        import ArgumentParser
-    //
-    //        do {
-    //            let installer = Installer()
-    //            try installer.append(.init("cocoapods", "1.16.2"))
-    //            try installer.install()
-    //        } catch {
-    //            print(error)
-    //        }
-
-            //do {
-            //    let installer = Installer()
-            //    try installer.append(.init("ruby", "2.7.8"))
-            //    try installer.install()
-            //} catch {
-            //    print(error)
-            //}
-
+            let installer = Installer()
+            try installer.append(.init(name, version))
+            try installer.install(verbose: verbose)
         }
     }
 }

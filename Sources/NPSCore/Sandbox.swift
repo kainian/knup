@@ -43,21 +43,24 @@ public final class Sandbox: Sendable {
 extension Sandbox {
     
     public func installed(_ plugin: PluginYml) -> Bool {
-        return installed(.init(plugin.name, plugin.version), plugin.rubygems)
+        switch plugin.type {
+        case .cellar:
+            return fileSystem.isDirectory(directory(plugin)) &&
+                fileSystem.isFile(release(plugin))
+        case .caskroom:
+            return fileSystem.isDirectory(directory(plugin)) &&
+                fileSystem.isFile(release(plugin))
+        case .gems:
+            return fileSystem.isDirectory(directory(plugin)) &&
+                fileSystem.isFile(gemfile(plugin)) &&
+                fileSystem.isFile(gemlock(plugin)) &&
+                fileSystem.isFile(release(plugin))
+        }
     }
     
-    public func installed(_ dependency: PluginYml.Dependency, _ rubygems: Bool = false) -> Bool {
-        if rubygems {
-            return fileSystem.isFile(gemfilelockPath(dependency))
-        } else {
-            if fileSystem.isDirectory(cellarPath(dependency)) {
-                return true
-            } else if fileSystem.isDirectory(caskroomPath(dependency)) {
-                return true
-            } else {
-                return false
-            }
-        }
+    public func clean(_ plugin: PluginYml) throws {
+        try fileSystem.removeFileTree(directory(plugin))
+        try fileSystem.removeFileTree(release(plugin))
     }
 }
 
@@ -65,51 +68,78 @@ extension Sandbox {
     
     public static let shared: Sandbox = .init()
     
-    public func dirname(_ plugin: PluginYml) -> String {
-        return dirname(.init(plugin.name, plugin.version))
+    fileprivate func absolutePath(validating pathString: String) -> AbsolutePath? {
+        // The path representation does not properly handle paths on all
+        // platforms.  On Windows, we often see an empty key which we would
+        // like to treat as being the relative path to cwd.
+        if let absolute = try? AbsolutePath(validating: pathString) {
+            return absolute
+        } else if let relative = try? RelativePath(validating: pathString) {
+            return fileSystem.currentWorkingDirectory?.appending(relative)
+        } else {
+            return nil
+        }
+    }
+}
+
+extension Sandbox {
+    
+    private func dirname(_ plugin: PluginYml) -> String {
+        return "\(plugin.name)@\(plugin.version)"
     }
     
-    public func dirname(_ dependency: PluginYml.Dependency) -> String {
-        return "\(dependency.name)@\(dependency.version)"
+    public func directory(_ plugin: PluginYml) -> AbsolutePath {
+        switch plugin.type {
+        case .caskroom:
+            return home.appending(components: ["Caskroom", dirname(plugin)])
+        case .cellar:
+            return home.appending(components: ["Cellar", dirname(plugin)])
+        case .gems:
+            return home.appending(components: ["Gems", dirname(plugin)])
+        }
     }
     
-    public func cellarPath(_ plugin: PluginYml) -> AbsolutePath {
-        return cellarPath(.init(plugin.name, plugin.version))
+    public func release(_ plugin: PluginYml) -> AbsolutePath {
+        switch plugin.type {
+        case .caskroom:
+            return home.appending(components: ["share", "plugins", "Caskroom", "\(dirname(plugin)).yml"])
+        case .cellar:
+            return home.appending(components: ["share", "plugins", "Cellar", "\(dirname(plugin)).yml"])
+        case .gems:
+            return home.appending(components: ["share", "plugins", "Gems", "\(dirname(plugin)).yml"])
+        }
+    }
+        
+    public func gemfile(_ plugin: PluginYml) -> AbsolutePath {
+        return directory(plugin).appending(component: "Gemfile")
     }
     
-    public func cellarPath(_ dependency: PluginYml.Dependency) -> AbsolutePath {
-        return home.appending(components: ["Cellar", dirname(dependency)])
+    public func gemlock(_ plugin: PluginYml) -> AbsolutePath {
+        return directory(plugin).appending(component: "Gemfile.lock")
     }
+}
+
+extension Sandbox {
     
-    public func caskroomPath(_ plugin: PluginYml) -> AbsolutePath {
-        return cellarPath(.init(plugin.name, plugin.version))
-    }
-    
-    public func caskroomPath(_ dependency: PluginYml.Dependency) -> AbsolutePath {
-        return home.appending(components: ["Caskroom", dirname(dependency)])
-    }
-    
-    public func gemsPath(_ plugin: PluginYml) -> AbsolutePath {
-        return gemsPath(.init(plugin.name, plugin.version))
-    }
-    
-    public func gemsPath(_ dependency: PluginYml.Dependency) -> AbsolutePath {
-        return home.appending(components: ["Gems", dirname(dependency)])
-    }
-    
-    public func gemfilePath(_ plugin: PluginYml) -> AbsolutePath {
-        gemfilePath(.init(plugin.name, plugin.version))
-    }
-    
-    public func gemfilePath(_ dependency: PluginYml.Dependency) -> AbsolutePath {
-        return gemsPath(dependency).appending(component: "Gemfile")
-    }
-    
-    public func gemfilelockPath(_ plugin: PluginYml) -> AbsolutePath {
-        gemfilelockPath(.init(plugin.name, plugin.version))
-    }
-    
-    public func gemfilelockPath(_ dependency: PluginYml.Dependency) -> AbsolutePath {
-        return gemsPath(dependency).appending(component: "Gemfile.lock")
+    public var settingsPath: AbsolutePath? {
+        get {
+            if let pathString = ProcessEnv.block[.init("NEXT_SETTINGS_PATH")],
+                let file = absolutePath(validating: pathString) {
+                if fileSystem.isFile(file) {
+                    return file
+                }
+            }
+            
+            var absolutePath = fileSystem.currentWorkingDirectory
+            let relativePath = try! RelativePath(validating: ".npup/Settings.yml")
+            while let path = absolutePath, path != path.parentDirectory {
+                let file = path.appending(relativePath)
+                if fileSystem.isFile(file) {
+                    return file
+                }
+                absolutePath = path.parentDirectory
+            }
+            return nil
+        }
     }
 }

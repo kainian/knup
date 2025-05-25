@@ -142,7 +142,7 @@ else
   UNAME_MACHINE="$(uname -m)"
   
   NEXT_PREFIX="/home/np"
-  NEXT_REPOSITORY="${NEXT_PREFIX}/.np"
+  NEXT_REPOSITORY="${NEXT_PREFIX}/.npup"
 
   STAT_PRINTF=("/usr/bin/stat" "--printf")
   PERMISSION_FORMAT="%a"

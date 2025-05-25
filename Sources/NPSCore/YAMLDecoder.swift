@@ -21,11 +21,20 @@ extension YAMLDecoder {
 //        }
         let pathString = absolutePath.pathString
         let url = URL(fileURLWithPath: pathString)
-        let data = try Data(contentsOf: url)
         do {
+            let data = try Data(contentsOf: url)
             return try YAMLDecoder().decode(type, from: data)
         } catch {
-            throw Error.yaml(.decode(absolutePath, error))
+            throw Error.yaml(.decode(absolutePath.prettyPath(), error))
+        }
+    }
+    
+    public static func decode<T>(_ type: T.Type, from string: String) throws -> T where T: Decodable {
+        do {
+            let data = string.data(using: .utf8)
+            return try YAMLDecoder().decode(type, from: data!)
+        } catch {
+            throw Error.yaml(.decode(string, error))
         }
     }
 }

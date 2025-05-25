@@ -1,5 +1,6 @@
 name: rbenv
 version: 1.3.2
+type: cellar
 abstract: |
   rbenv is a version manager tool for the Ruby programming language
   on Unix-like systems. It is useful for switching between multiple Ruby
@@ -15,4 +16,4 @@ bootstraps:
 provisions:
   - name: fetch rbenv & ruby-build
     script: |
-      (eval "$(cat "utils/share/rbenv/1.3.2")")
+      (eval "$(cat "${NEXT_REPOSITORY}/utils/share/rbenv/1.3.2")")
