@@ -5,8 +5,6 @@
 //  Created by Jonathan Lee on 5/17/25.
 //
 
-import struct TSCBasic.AbsolutePath
-
 public enum Error: Swift.Error {
     
     case yaml(Yaml)
@@ -14,6 +12,8 @@ public enum Error: Swift.Error {
     case dependency(Dependency)
     
     case process(Process)
+    
+    case couldNotSettings
 }
 
 extension Error {
@@ -23,8 +23,8 @@ extension Error {
     }
     
     public enum Dependency: Sendable {
-        case circular([PluginYml])
-        case conflict([String: [[PluginYml]]])
+        case circular([NPSCore.Model.Plugin])
+        case conflict([String: [[NPSCore.Model.Plugin]]])
     }
     
     public enum Process: Sendable {
@@ -43,6 +43,8 @@ extension Error: CustomStringConvertible {
             return yaml.description
         case .process(let process):
             return process.description
+        case .couldNotSettings:
+            return "Could not locate Settings.yml"
         }
     }
 }

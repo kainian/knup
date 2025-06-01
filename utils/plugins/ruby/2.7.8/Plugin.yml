@@ -7,20 +7,20 @@ abstract: |
   and easy to write.
 bootstraps:
   - name: init
-    script: |
+    content: |
       export RUBY_VERSION="ruby-2.7.8"
     prepare:
       - plugin: rbenv
         name: init
   - name: shell
-    script: |
+    content: |
       rbenv shell $RUBY_VERSION
     prepare:
       - plugin: ruby
         name: init
 provisions:
   - name: rbenv install
-    script: |
+    content: |
       loads=(--with-openssl-dir="${NEXT_PREFIX}/Cellar/openssl@1.1.1w")
       loads+=(--with-readline-dir="${NEXT_PREFIX}/Cellar/readline@8.2.13")
       loads+=(--with-libyaml-dir="${NEXT_PREFIX}/Cellar/libyaml@0.2.5")
@@ -32,18 +32,18 @@ provisions:
       - plugin: ruby
         name: init
   - name: ropenssl
-    script: |
+    content: |
       curl -fsSL curl.haxx.se/ca/cacert.pem -o "$(ruby -ropenssl -e 'puts OpenSSL::X509::DEFAULT_CERT_FILE')"
       curl -Lks 'https://git.io/rg-ssl' | ruby
     prepare:
       - plugin: ruby
         name: shell
   - name: link
-    script: |
+    content: |
       execute "ln" "-sf" "${RBENV_ROOT}/versions/${RUBY_VERSION}" "${NEXT_PREFIX}/Cellar/ruby@2.7.8"
 doctors:
   - name: ropenssl
-    script: |
+    content: |
       curl -fsSL curl.haxx.se/ca/cacert.pem -o "$(ruby -ropenssl -e 'puts OpenSSL::X509::DEFAULT_CERT_FILE')"
       curl -Lks 'https://git.io/rg-ssl' | ruby
     prepare:
@@ -51,23 +51,28 @@ doctors:
         name: shell
 commands:
   - name: ruby
-    command: bin/ruby
+    path: bin/ruby
     description: |
       Ruby is a dynamic, open source programming language with a focus on 
       simplicity and productivity. It has an elegant syntax that is natural to read
       and easy to write.
+    prepare:
+      - plugin: ruby
+        name: shell
   - name: gem
-    command: bin/gem
+    path: bin/gem
     description: |
       Gem is a package manager for Ruby applications and libraries.
-  - name: bundle
-    command: bin/bundle
-    description: |
-      Bundler manages application dependencies for Ruby applications.
+    prepare:
+      - plugin: ruby
+        name: shell
   - name: irb
-    command: bin/irb
+    path: bin/irb
     description: |
       Interactive Ruby (IRB) is a REPL (Read-Eval-Print Loop) for Ruby.
+    prepare:
+      - plugin: ruby
+        name: shell
 dependencies:
   - name: gmp
     version: 6.3.0

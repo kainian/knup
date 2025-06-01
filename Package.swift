@@ -23,6 +23,11 @@ let package = Package(
             name: "npup",
             targets: [
                 "NPSetup"
+            ]),
+        .executable(
+            name: "np",
+            targets: [
+                "NP"
             ])
     ],
     dependencies: [
@@ -49,6 +54,11 @@ let package = Package(
             dependencies: [
                 "NPSInstaller",
                 .product(name: "ArgumentParser", package: "swift-argument-parser")
+            ]),
+        .executableTarget(
+            name: "NP",
+            dependencies: [
+                "NPSInstaller"
             ]),
     ]
 )

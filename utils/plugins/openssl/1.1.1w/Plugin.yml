@@ -7,5 +7,5 @@ abstract: |
   for the TLS (formerly SSL), DTLS and QUIC protocols.
 provisions:
   - name: make
-    script: |
+    content: |
       (eval "$(cat "${NEXT_REPOSITORY}/utils/share/openssl/1.1.1w")")

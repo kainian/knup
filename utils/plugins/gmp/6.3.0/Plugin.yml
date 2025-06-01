@@ -9,5 +9,5 @@ abstract: |
   higher precision than is directly supported by the basic C types.
 provisions:
   - name: make
-    script: |
+    content: |
       (eval "$(cat "${NEXT_REPOSITORY}/utils/share/gmp/6.3.0")")

@@ -1,24 +1,11 @@
 //
-//  GemfileYml.swift
+//  Gemfile+Additional.swift
 //  NextPangeaSetup
 //
-//  Created by Jonathan Lee on 5/23/25.
+//  Created by Jonathan Lee on 6/1/25.
 //
 
-public struct GemfileYml: Codable, Sendable {
-    
-    public struct Gem: Codable, Sendable {
-        let name: String
-        let version: String?
-        let source: String?
-        let path: String?
-    }
-    
-    public let source: [String]?
-    public let gems: [Gem]?
-}
-
-extension GemfileYml: CustomStringConvertible {
+extension Model.Gemfile: CustomStringConvertible {
     
     public var description: String {
         var description: [String] = []
@@ -44,12 +31,4 @@ extension GemfileYml: CustomStringConvertible {
         }
         return description.joined(separator: "\n")
     }
-}
-
-extension GemfileYml: Hashable {
-    
-}
-
-extension GemfileYml.Gem: Hashable {
-    
 }

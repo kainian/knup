@@ -14,7 +14,8 @@ import class Yams.YAMLEncoder
 extension YAMLEncoder {
     
     public static func encode<T: Swift.Encodable>(_ value: T, userInfo: [CodingUserInfoKey: Any] = [:]) throws -> String {
-        try YAMLEncoder().encode(value, userInfo: userInfo)
+        let encoder = YAMLEncoder()
+        return try encoder.encode(value, userInfo: userInfo);
     }
     
     public static func write<T: Swift.Encodable>(_ value: T, userInfo: [CodingUserInfoKey: Any] = [:], to absolutePath: AbsolutePath) throws {

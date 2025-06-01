@@ -30,9 +30,9 @@ extension Command {
         var verbose = false
         
         func run() throws {
-            let installer = Installer()
-            try installer.append(.init(name, version))
-            try installer.install(verbose: verbose)
+            let installer = Installer(sandbox: .shared)
+            let information = Model.Dependency(name, version)
+            try installer.install(information)
         }
     }
 }

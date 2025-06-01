@@ -8,12 +8,23 @@ abstract: |
   working on always runs on the correct Ruby version.
 bootstraps:
   - name: init
-    script: |
+    content: |
       export RBENV_ROOT="${NEXT_PREFIX}/Cellar/rbenv@1.3.2"
       export RUBY_BUILD_CACHE_PATH="${RBENV_ROOT}/cache"
       export PATH="${RBENV_ROOT}/bin:$PATH"
       eval "$(rbenv init -)"
 provisions:
   - name: fetch rbenv & ruby-build
-    script: |
+    content: |
       (eval "$(cat "${NEXT_REPOSITORY}/utils/share/rbenv/1.3.2")")
+commands:
+  - name: rbenv 
+    path: bin/rbenv
+    description: |
+      rbenv is a version manager tool for the Ruby programming language
+      on Unix-like systems. It is useful for switching between multiple Ruby
+      versions on the same machine and for ensuring that each project you are 
+      working on always runs on the correct Ruby version.
+    prepare:
+      - plugin: rbenv
+        name: init

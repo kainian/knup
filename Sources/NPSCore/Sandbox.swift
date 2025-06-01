@@ -10,6 +10,8 @@ import protocol TSCBasic.FileSystem
 import enum TSCBasic.ProcessEnv
 import struct TSCBasic.AbsolutePath
 import struct TSCBasic.RelativePath
+import class Yams.YAMLDecoder
+import struct Foundation.Data
 
 public final class Sandbox: Sendable {
     
@@ -42,33 +44,109 @@ public final class Sandbox: Sendable {
 
 extension Sandbox {
     
-    public func installed(_ plugin: PluginYml) -> Bool {
+    public func installed(_ plugin: Model.Plugin) -> Bool {
         switch plugin.type {
         case .cellar:
-            return fileSystem.isDirectory(directory(plugin)) &&
-                fileSystem.isFile(release(plugin))
+            return fileSystem.isDirectory(store(plugin)) &&
+                fileSystem.isFile(additional(plugin).appending(component: "Plugin.yml"))
         case .caskroom:
-            return fileSystem.isDirectory(directory(plugin)) &&
-                fileSystem.isFile(release(plugin))
+            return fileSystem.isDirectory(store(plugin)) &&
+                fileSystem.isFile(additional(plugin).appending(component: "Plugin.yml"))
         case .gems:
-            return fileSystem.isDirectory(directory(plugin)) &&
-                fileSystem.isFile(gemfile(plugin)) &&
-                fileSystem.isFile(gemlock(plugin)) &&
-                fileSystem.isFile(release(plugin))
+            return fileSystem.isDirectory(store(plugin)) &&
+                fileSystem.isFile(additional(plugin).appending(component: "Plugin.yml")) &&
+                fileSystem.isFile(store(plugin).appending(component: "Gemfile")) &&
+                fileSystem.isFile(store(plugin).appending(component: "Gemfile.lock"))
         }
     }
     
-    public func clean(_ plugin: PluginYml) throws {
-        try fileSystem.removeFileTree(directory(plugin))
-        try fileSystem.removeFileTree(release(plugin))
+    public func clean(_ plugin: Model.Plugin) throws {
+        try fileSystem.removeFileTree(store(plugin))
+        try fileSystem.removeFileTree(additional(plugin))
     }
 }
 
 extension Sandbox {
     
-    public static let shared: Sandbox = .init()
+    public struct SettingsPathBox {
+        public let path: AbsolutePath
+        public let lock: AbsolutePath
+        public let dir: AbsolutePath
+        public init(settingsPath: AbsolutePath) {
+            path = settingsPath
+            dir = path.parentDirectory
+            lock = dir.appending(component: "Settings.lock")
+        }
+        public init(lockPath: AbsolutePath) {
+            lock = lockPath
+            dir = lock.parentDirectory
+            path = dir.appending(component: "Settings.yml")
+            
+        }
+        public init(directory: AbsolutePath) {
+            dir = directory
+            path = directory.appending(component: "Settings.yml")
+            lock = directory.appending(component: "Settings.lock")
+        }
+    }
     
-    fileprivate func absolutePath(validating pathString: String) -> AbsolutePath? {
+    public static let shared: Sandbox = .init()
+}
+
+extension Sandbox {
+    
+    private func dirname(_ plugin: Model.Plugin) -> String {
+        return "\(plugin.name)@\(plugin.version)"
+    }
+    
+    public func relative(_ plugin: Model.Plugin) -> RelativePath {
+        switch plugin.type {
+        case .caskroom:
+            return try! RelativePath(validating: "Caskroom/\(dirname(plugin))")
+        case .cellar:
+            return try! RelativePath(validating: "Cellar/\(dirname(plugin))")
+        case .gems:
+            return try! RelativePath(validating: "Gems/\(dirname(plugin))")
+        }
+    }
+    
+    public func store(_ plugin: Model.Plugin) -> AbsolutePath {
+        home.appending(relative(plugin))
+    }
+    
+    public func additional(_ plugin: Model.Plugin) -> AbsolutePath {
+        home.appending(components: ["share", "plugins"]).appending(relative(plugin))
+    }
+}
+
+extension Sandbox {
+    
+    public var pathBox: SettingsPathBox {
+        get throws {
+            .init(settingsPath: try findSettingsPath())
+        }
+    }
+    
+    private func findSettingsPath() throws -> AbsolutePath {
+        if let pathString = ProcessEnv.block[.init("NEXT_SETTINGS_PATH")],
+            let file = absolutePath(validating: pathString) {
+            if fileSystem.isFile(file) {
+                return file
+            }
+        }
+        var absolutePath = fileSystem.currentWorkingDirectory
+        let relativePath = try! RelativePath(validating: ".npup/Settings.yml")
+        while let path = absolutePath, path != path.parentDirectory {
+            let file = path.appending(relativePath)
+            if fileSystem.isFile(file) {
+                return file
+            }
+            absolutePath = path.parentDirectory
+        }
+        throw Error.couldNotSettings
+    }
+    
+    private func absolutePath(validating pathString: String) -> AbsolutePath? {
         // The path representation does not properly handle paths on all
         // platforms.  On Windows, we often see an empty key which we would
         // like to treat as being the relative path to cwd.
@@ -82,64 +160,20 @@ extension Sandbox {
     }
 }
 
-extension Sandbox {
-    
-    private func dirname(_ plugin: PluginYml) -> String {
-        return "\(plugin.name)@\(plugin.version)"
-    }
-    
-    public func directory(_ plugin: PluginYml) -> AbsolutePath {
-        switch plugin.type {
-        case .caskroom:
-            return home.appending(components: ["Caskroom", dirname(plugin)])
-        case .cellar:
-            return home.appending(components: ["Cellar", dirname(plugin)])
-        case .gems:
-            return home.appending(components: ["Gems", dirname(plugin)])
-        }
-    }
-    
-    public func release(_ plugin: PluginYml) -> AbsolutePath {
-        switch plugin.type {
-        case .caskroom:
-            return home.appending(components: ["share", "plugins", "Caskroom", "\(dirname(plugin)).yml"])
-        case .cellar:
-            return home.appending(components: ["share", "plugins", "Cellar", "\(dirname(plugin)).yml"])
-        case .gems:
-            return home.appending(components: ["share", "plugins", "Gems", "\(dirname(plugin)).yml"])
-        }
-    }
-        
-    public func gemfile(_ plugin: PluginYml) -> AbsolutePath {
-        return directory(plugin).appending(component: "Gemfile")
-    }
-    
-    public func gemlock(_ plugin: PluginYml) -> AbsolutePath {
-        return directory(plugin).appending(component: "Gemfile.lock")
-    }
-}
 
-extension Sandbox {
+extension Sandbox.SettingsPathBox {
     
-    public var settingsPath: AbsolutePath? {
-        get {
-            if let pathString = ProcessEnv.block[.init("NEXT_SETTINGS_PATH")],
-                let file = absolutePath(validating: pathString) {
-                if fileSystem.isFile(file) {
-                    return file
-                }
-            }
-            
-            var absolutePath = fileSystem.currentWorkingDirectory
-            let relativePath = try! RelativePath(validating: ".npup/Settings.yml")
-            while let path = absolutePath, path != path.parentDirectory {
-                let file = path.appending(relativePath)
-                if fileSystem.isFile(file) {
-                    return file
-                }
-                absolutePath = path.parentDirectory
-            }
-            return nil
+    public func settings() throws -> Model.Settings {
+        try YAMLDecoder.decode(Model.Settings.self, from: path)
+    }
+    
+    public func lockfile() throws -> Model.Lock {
+        try YAMLDecoder.decode(Model.Lock.self, from: lock)
+    }
+    
+    public var sha256: String {
+        get throws {
+            try Data(contentsOf: .init(fileURLWithPath: path.pathString)).sha256
         }
     }
 }

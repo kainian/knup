@@ -6,5 +6,5 @@ abstract: |
   Library for editing typed command lines
 provisions:
   - name: make
-    script: |
+    content: |
       (eval "$(cat "${NEXT_REPOSITORY}/utils/share/readline/8.2.13")")

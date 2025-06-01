@@ -374,7 +374,9 @@ xcuserdata
 /*.gcno
 **/xcshareddata/WorkspaceSettings.xcsettings
 
+# NPUP Examples
 bin/
+share/
 Settings.lock
 
 # End of https://www.toptal.com/developers/gitignore/api/clion,macos,swift,xcode,objective-c,visualstudiocode,swiftpackagemanager,cocoapods,carthage,ruby

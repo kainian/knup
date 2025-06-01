@@ -1,36 +1,20 @@
 //
-//  PluginYml.swift
+//  Plugin+Addintional.swift
 //  NextPangeaSetup
 //
-//  Created by Jonathan Lee on 5/16/25.
+//  Created by Jonathan Lee on 6/1/25.
 //
 
-import struct TSCBasic.RelativePath
 import class Yams.YAMLDecoder
+import struct TSCBasic.RelativePath
 
-public struct PluginYml: Codable, Sendable {
-    public enum PluginType: String, Codable, Sendable {
-        case caskroom, cellar, gems
-    }
-    public let name: String
-    public let version: String
-    public let type: PluginType
-    public let multiVersionEnabled: Bool?
-    public let abstract: String?
-    public let rubygems: GemfileYml?
-    public let doctors: [ScriptYml]?
-    public let bootstraps: [ScriptYml]?
-    public let provisions: [ScriptYml]?
-    public let dependencies: [DependencyYml]?
-}
-
-extension PluginYml {
+extension Model.Plugin {
     
     public var key: String {
         "\(name)@\(version)"
     }
     
-    public var children: [PluginYml] {
+    public var children: [Model.Plugin] {
         get throws {
             let sandbox = Sandbox.shared
             return try dependencies?.map {
@@ -49,9 +33,9 @@ extension PluginYml {
     
 }
 
-extension PluginYml: Hashable {
+extension Model.Plugin: Hashable {
     
-    public static func == (lhs: PluginYml, rhs: PluginYml) -> Bool {
+    public static func == (lhs: Model.Plugin, rhs: Model.Plugin) -> Bool {
         lhs.name == rhs.name && lhs.version == rhs.version
     }
     
@@ -63,13 +47,13 @@ extension PluginYml: Hashable {
 
 extension Sandbox {
     
-    private func relativePath(_ dependency: DependencyYml) throws -> RelativePath {
+    private func relativePath(_ dependency: Model.Dependency) throws -> RelativePath {
         try RelativePath(validating: "utils/plugins/\(dependency.name)/\(dependency.version)/Plugin.yml")
     }
     
-    public func plugin(dependency: DependencyYml) throws -> PluginYml {
+    public func plugin(dependency: Model.Dependency) throws -> Model.Plugin {
         let relativePath = try relativePath(dependency)
         let absolutePath = bundle.appending(relativePath)
-        return try YAMLDecoder.decode(PluginYml.self, from: absolutePath)
+        return try YAMLDecoder.decode(Model.Plugin.self, from: absolutePath)
     }
 }

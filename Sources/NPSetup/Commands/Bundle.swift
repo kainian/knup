@@ -9,6 +9,7 @@ import ArgumentParser
 import NPSInstaller
 import NPSCore
 import class Yams.YAMLDecoder
+import class Yams.YAMLEncoder
 
 extension Command {
     
@@ -21,14 +22,18 @@ extension Command {
         @Flag(name: .shortAndLong, help: "Include extra information in the output.")
         var verbose = false
         
+        @Flag(help: "Reinstall direct dependencies declared in Settings.yml.")
+        var reinstallDirect = false
+        
+        @Flag(help: "Reinstall all dependencies (including transitive dependencies).")
+        var reinstallAll = false
+        
         func run() throws {
             let sandbox = Sandbox.shared
-            guard let settingsPath = sandbox.settingsPath else {
-                return
-            }
-            let installer = Installer()
-            try installer.append(try YAMLDecoder.decode(SettingsYml.self, from: settingsPath))
-            try installer.install(verbose: verbose)
+            let box = try sandbox.pathBox
+            let mode = Installer.ReinstallMode(reinstallDirect, reinstallAll)
+            let installer = Installer(sandbox: .shared, mode: mode)
+            try installer.install(box: box)
         }
     }
 }

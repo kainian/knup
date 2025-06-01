@@ -20,7 +20,7 @@ rubygems:
       source: https://rubygems.org
 bootstraps:
   - name: init
-    script: |
+    content: |
         export GEM_HOME="$NEXT_PREFIX/Gems/cocoapods@1.16.2"
         export GEM_PATH="$NEXT_PREFIX/Gems/cocoapods@1.16.2"
         export BUNDLE_GEMFILE="$GEM_HOME/Gemfile"
@@ -29,30 +29,46 @@ bootstraps:
         name: shell
 provisions:
   - name: install
-    script: |
+    content: |
         ${RBENV_ROOT}/shims/bundle install
     prepare:
-      - plugin: ruby
-        name: shell
       - plugin: cocoapods
         name: init
 doctors:
   - name: install
-    script: |
+    content: |
       ${RBENV_ROOT}/shims/bundle install
     prepare:
       - plugin: ruby
         name: shell
   - name: check
-    script: |
+    content: |
       ${RBENV_ROOT}/shims/bundle install check
 commands:
-  - name: ruby
-    command: bin/ruby
+  - name: bundle
     description: |
-      Ruby is a dynamic, open source programming language with a focus on 
-      simplicity and productivity. It has an elegant syntax that is natural to read
-      and easy to write.
+      Bundler manages Ruby application dependencies through a file called Gemfile.
+      It ensures that the right versions of gems are used in your project.
+    prepare:
+      - plugin: cocoapods
+        name: init  
+  - name: pod
+    path: bin/pod
+    description: |
+      CocoaPods is a dependency manager for Swift and Objective-C Cocoa projects. 
+      It has over 104 thousand libraries and is used in over 3 million apps. 
+      CocoaPods can help you scale your projects elegantly.
+    prepare:
+      - plugin: cocoapods
+        name: init
+  - name: xcodeproj
+    path: bin/xcodeproj
+    description: |
+      Xcodeproj is a Ruby library for reading and writing Xcode project files.
+      It is used by CocoaPods to manage Xcode projects.
+    prepare:
+      - plugin: cocoapods
+        name: init 
 dependencies:
   - name: ruby
     version: 3.4.3
