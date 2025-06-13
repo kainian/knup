@@ -10,14 +10,9 @@ let package = Package(
     ],
     products: [
         .library(
-            name: "NPSCore",
+            name: "NPCommon",
             targets: [
-                "NPSCore"
-            ]),
-        .library(
-            name: "NPSInstaller",
-            targets: [
-                "NPSInstaller"
+                "NPCommon"
             ]),
         .executable(
             name: "npup",
@@ -27,7 +22,7 @@ let package = Package(
         .executable(
             name: "np",
             targets: [
-                "NP"
+                "NPDriver"
             ])
     ],
     dependencies: [
@@ -37,28 +32,21 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "NPSCore",
+            name: "NPCommon",
             dependencies: [
-                .product(name: "Yams", package: "Yams"),
-                .product(name: "TSCBasic", package: "swift-tools-support-core"),
-            ]),
-        .target(
-            name: "NPSInstaller",
-            dependencies: [
-                "NPSCore",
                 .product(name: "Yams", package: "Yams"),
                 .product(name: "TSCBasic", package: "swift-tools-support-core"),
             ]),
         .executableTarget(
             name: "NPSetup",
             dependencies: [
-                "NPSInstaller",
+                "NPCommon",
                 .product(name: "ArgumentParser", package: "swift-argument-parser")
             ]),
         .executableTarget(
-            name: "NP",
+            name: "NPDriver",
             dependencies: [
-                "NPSInstaller"
+                "NPCommon"
             ]),
     ]
 )

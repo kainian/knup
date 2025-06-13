@@ -5,8 +5,7 @@
 //  Created by Jonathan Lee on 5/27/25.
 //
 
-import NPSCore
-import NPSInstaller
+import NPCommon
 import struct Foundation.Data
 import class Yams.YAMLDecoder
 import struct TSCBasic.AbsolutePath
@@ -18,7 +17,7 @@ func main(_ arguments: [String] = CommandLine.arguments) throws {
         arguments.insert(program.pathString, at: 1)
         try Subprocess.exec(arguments: arguments)
     } else {
-        print("error: \(CommandLine.arguments)")
+        // help
     }
 }
 

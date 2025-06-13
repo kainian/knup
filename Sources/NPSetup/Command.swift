@@ -16,7 +16,6 @@ struct Command: ParsableCommand {
         subcommands: [
             Init.self,
             Install.self,
-            List.self,
             Bundle.self,
         ]
     )

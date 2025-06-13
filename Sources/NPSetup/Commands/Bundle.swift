@@ -5,9 +5,8 @@
 //  Created by Jonathan Lee on 5/23/25.
 //
 
+import NPCommon
 import ArgumentParser
-import NPSInstaller
-import NPSCore
 import class Yams.YAMLDecoder
 import class Yams.YAMLEncoder
 
@@ -16,7 +15,11 @@ extension Command {
     struct Bundle: ParsableCommand {
         
         static let configuration: CommandConfiguration = .init(
-            abstract: "Install and upgrade (by default) all dependencies from the Settings.yml."
+            abstract: "Install and upgrade (by default) all dependencies from the Settings.yml.",
+            subcommands: [
+                Info.self,
+                List.self,
+            ]
         )
         
         @Flag(name: .shortAndLong, help: "Include extra information in the output.")

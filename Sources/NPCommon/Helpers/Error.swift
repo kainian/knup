@@ -23,8 +23,8 @@ extension Error {
     }
     
     public enum Dependency: Sendable {
-        case circular([NPSCore.Model.Plugin])
-        case conflict([String: [[NPSCore.Model.Plugin]]])
+        case circular([Model.Plugin])
+        case conflict([String: [[Model.Plugin]]])
     }
     
     public enum Process: Sendable {

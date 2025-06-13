@@ -5,9 +5,8 @@
 //  Created by Jonathan Lee on 5/23/25.
 //
 
+import NPCommon
 import ArgumentParser
-import NPSInstaller
-import NPSCore
 
 extension Command {
     

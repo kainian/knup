@@ -146,7 +146,7 @@ extension Sandbox {
         throw Error.couldNotSettings
     }
     
-    private func absolutePath(validating pathString: String) -> AbsolutePath? {
+    public func absolutePath(validating pathString: String) -> AbsolutePath? {
         // The path representation does not properly handle paths on all
         // platforms.  On Windows, we often see an empty key which we would
         // like to treat as being the relative path to cwd.

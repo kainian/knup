@@ -5,7 +5,6 @@
 //  Created by Jonathan Lee on 6/1/25.
 //
 
-import NPSCore
 import func TSCBasic.exec
 import class TSCBasic.Process
 import enum TSCBasic.ProcessEnv
