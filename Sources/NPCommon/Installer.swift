@@ -157,8 +157,8 @@ extension Installer {
         NEXT_PATH="${NEXT_PATH:-\(sandbox.bundle)}"
         if [[ "${NEXT_INITIALIZED_MODULES:-}" != *":NEXT"* ]]; then
             export NEXT_INITIALIZED_MODULES="${NEXT_INITIALIZED_MODULES:-}:NEXT"
-            source "${NEXT_PATH}/utils/setup"
-            source "${NEXT_PATH}/utils/package"
+            source "${NEXT_PATH}/utils/init"
+            source "${NEXT_PATH}/utils/make"
         fi
         
         \(result.commands(command))
@@ -186,8 +186,8 @@ extension Installer {
             
             if [[ "${NEXT_INITIALIZED_MODULES:-}" != *":NEXT"* ]]; then
                 export NEXT_INITIALIZED_MODULES="${NEXT_INITIALIZED_MODULES:-}:NEXT"
-                source "${NEXT_PATH}/utils/setup"
-                source "${NEXT_PATH}/utils/package"
+                source "${NEXT_PATH}/utils/init"
+                source "${NEXT_PATH}/utils/make"
             fi
             
             \(script)

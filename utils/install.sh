@@ -194,7 +194,6 @@ have_sudo_access() {
 }
 
 execute() {
-  ohai "$(shell_join "$@")"
   if ! "$@"
   then
     abort "$(printf "Failed during: %s" "$(shell_join "$@")")"
@@ -385,11 +384,12 @@ ohai "Downloading and installing NextPangea..."
     fi
     execute "git" "checkout" "--quiet" "--force" "-B" "stable" "${LATEST_GIT_TAG}"
 
-    source "utils/package"
     ohai "Coping npup to ${NEXT_PREFIX}/bin..."
+
+    source "utils/make"
     eval "install_binary npup https://github.com/nextpangea/npup/releases/download/${LATEST_GIT_TAG}/npup-universal.tar.xz"
-    execute_sudo "ln" "-sf" "${NEXT_REPOSITORY}/bin/npup" "/usr/local/bin/npup" 
-    execute_sudo "ln" "-sf" "${NEXT_REPOSITORY}/bin/np" "/usr/local/bin/np"
+    execute_sudo "ln" "-sf" "${NEXT_PREFIX}/bin/npup" "/usr/local/bin/npup" 
+    execute_sudo "ln" "-sf" "${NEXT_PREFIX}/bin/np" "/usr/local/bin/np"
 )
 
 ohai "Installation successful!"
