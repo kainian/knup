@@ -108,4 +108,13 @@ install_rbenv() {
   mv "$rbenv_path" "${NEXT_PREFIX}/Cellar/$1"
 }
 
+install_binary() {
+  cd "$(mktemp -d)"
+  local package_name="$1"
+  local package_url="$2"
+  fetch_tarball "$package_name" "$package_url"
+  cd "$package_name"
+  execute mv * "${NEXT_PREFIX}/bin"
+}
+
 ##################### END OF FUNCTIONS #####################
