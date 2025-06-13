@@ -1,6 +1,5 @@
 script:
-  content: |
-    echo "?"
+  content: '# nothing to run'
   prepare:
     - plugin: cocoapods
       name: init

@@ -14,6 +14,8 @@ public enum Error: Swift.Error {
     case process(Process)
     
     case couldNotSettings
+    
+    case findExecutable(String)
 }
 
 extension Error {
@@ -45,6 +47,8 @@ extension Error: CustomStringConvertible {
             return process.description
         case .couldNotSettings:
             return "Could not locate Settings.yml"
+        case .findExecutable(let program):
+            return "unable to find utility '\(program)'"
         }
     }
 }

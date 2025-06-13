@@ -12,13 +12,17 @@ import struct TSCBasic.AbsolutePath
 
 func main(_ arguments: [String] = CommandLine.arguments) throws {
     var arguments = arguments
-    if let program = try program(&arguments) {
-        arguments.insert("/bin/bash", at: 0)
-        arguments.insert(program.pathString, at: 1)
-        try Subprocess.exec(arguments: arguments)
-    } else {
+    arguments.removeFirst()
+    guard !arguments.isEmpty else {
         // help
+        return
     }
+    
+    let box = try setup()
+    let program = try findExecutable(arguments.removeFirst(), box)
+    arguments.insert("/bin/bash", at: 0)
+    arguments.insert(program.pathString, at: 1)
+    try Subprocess.exec(arguments: arguments)
 }
 
 func setup() throws -> Sandbox.SettingsPathBox? {
@@ -51,25 +55,35 @@ func setup() throws -> Sandbox.SettingsPathBox? {
     return box
 }
 
-func program(_ arguments: inout [String]) throws -> AbsolutePath? {
-    arguments.removeFirst()
-    if let program = arguments.first {
-        arguments.removeFirst()
-        let box = try setup()
-        return findExecutable(program, box: box)
-    }
-    return nil
-}
-
-/// Returns the path of the the given program if found in the search paths.
-///
-/// The program can be executable name, relative path or absolute path.
-public func findExecutable(_ program: String, box: Sandbox.SettingsPathBox?) -> AbsolutePath? {
+func findExecutable(_ program: String, _ box: Sandbox.SettingsPathBox?) throws -> AbsolutePath {
     if let abs = box?.dir.appending(components: ["bin", program]) {
         return abs
     }
     
-    return nil
+    let sandbox = Sandbox.shared
+    let fileSystem = sandbox.fileSystem
+    let additional = sandbox.additional(nil)
+    for type in try fileSystem.getDirectoryContents(additional) {
+        let dirname = additional.appending(component: type)
+        if !fileSystem.isDirectory(dirname) {
+            continue
+        }
+        for name in try fileSystem.getDirectoryContents(dirname) {
+            let dirname = dirname.appending(components: [name, "bin"])
+            if !fileSystem.isDirectory(dirname) {
+                continue
+            }
+            for name in try fileSystem.getDirectoryContents(dirname) {
+                if name == program || name == "-\(program)" {
+                    let abs = dirname.appending(component: name)
+                    if fileSystem.isExecutableFile(abs) {
+                        return abs
+                    }
+                }
+            }
+        }
+    }
+    throw Error.findExecutable(program)
 }
 
 do {

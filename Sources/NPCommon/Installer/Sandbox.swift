@@ -68,33 +68,6 @@ extension Sandbox {
 
 extension Sandbox {
     
-    public struct SettingsPathBox {
-        public let path: AbsolutePath
-        public let lock: AbsolutePath
-        public let dir: AbsolutePath
-        public init(settingsPath: AbsolutePath) {
-            path = settingsPath
-            dir = path.parentDirectory
-            lock = dir.appending(component: "Settings.lock")
-        }
-        public init(lockPath: AbsolutePath) {
-            lock = lockPath
-            dir = lock.parentDirectory
-            path = dir.appending(component: "Settings.yml")
-            
-        }
-        public init(directory: AbsolutePath) {
-            dir = directory
-            path = directory.appending(component: "Settings.yml")
-            lock = directory.appending(component: "Settings.lock")
-        }
-    }
-    
-    public static let shared: Sandbox = .init()
-}
-
-extension Sandbox {
-    
     private func dirname(_ plugin: Model.Plugin) -> String {
         return "\(plugin.name)@\(plugin.version)"
     }
@@ -114,8 +87,12 @@ extension Sandbox {
         home.appending(relative(plugin))
     }
     
-    public func additional(_ plugin: Model.Plugin) -> AbsolutePath {
-        home.appending(components: ["share", "plugins"]).appending(relative(plugin))
+    public func additional(_ plugin: Model.Plugin?) -> AbsolutePath {
+        if let plugin = plugin {
+            return home.appending(components: ["share", "plugins"]).appending(relative(plugin))
+        } else {
+            return home.appending(components: ["share", "plugins"])
+        }
     }
 }
 
@@ -143,6 +120,7 @@ extension Sandbox {
             }
             absolutePath = path.parentDirectory
         }
+        
         throw Error.couldNotSettings
     }
     
@@ -176,4 +154,33 @@ extension Sandbox.SettingsPathBox {
             try Data(contentsOf: .init(fileURLWithPath: path.pathString)).sha256
         }
     }
+}
+
+
+extension Sandbox {
+    
+    public static let shared = Sandbox()
+    
+    public struct SettingsPathBox {
+        public let path: AbsolutePath
+        public let lock: AbsolutePath
+        public let dir: AbsolutePath
+        public init(settingsPath: AbsolutePath) {
+            path = settingsPath
+            dir = path.parentDirectory
+            lock = dir.appending(component: "Settings.lock")
+        }
+        public init(lockPath: AbsolutePath) {
+            lock = lockPath
+            dir = lock.parentDirectory
+            path = dir.appending(component: "Settings.yml")
+            
+        }
+        public init(directory: AbsolutePath) {
+            dir = directory
+            path = directory.appending(component: "Settings.yml")
+            lock = directory.appending(component: "Settings.lock")
+        }
+    }
+    
 }
