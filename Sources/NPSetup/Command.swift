@@ -17,6 +17,7 @@ struct Command: ParsableCommand {
             Init.self,
             Install.self,
             Bundle.self,
+            Update.self,
         ]
     )
 }

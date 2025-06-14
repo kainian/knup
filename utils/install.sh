@@ -349,7 +349,7 @@ then
 fi
 execute_sudo "${CHOWN[@]}" "-R" "${USER}:${GROUP}" "${NEXT_REPOSITORY}"
 
-ohai "Downloading and installing NextPangea..."
+ohai "Downloading and installing npup..."
 (
     cd "${NEXT_REPOSITORY}" >/dev/null || return
 
@@ -366,12 +366,12 @@ ohai "Downloading and installing NextPangea..."
     # make sure symlinks are saved as-is
     execute "git" "config" "--bool" "core.symlinks" "true"
 
-    if [[ -z "${NONINTERACTIVE-}" ]]
-    then
-        quiet_progress=("--quiet" "--progress")
-    else
+#    if [[ -z "${NONINTERACTIVE-}" ]]
+#    then
+#        quiet_progress=("--quiet" "--progress")
+#    else
         quiet_progress=("--quiet")
-    fi
+#    fi
     retry 5 "git" "fetch" "${quiet_progress[@]}" "--force" "origin"
     retry 5 "git" "fetch" "${quiet_progress[@]}" "--force" "--tags" "origin"
 

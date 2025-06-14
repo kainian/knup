@@ -136,6 +136,15 @@ extension Installer {
 
 extension Installer {
     
+    public func update() throws {
+        let path = sandbox.bundle.appending(components: ["utils", "update"])
+        let contents = try sandbox.fileSystem.readFileContents(path)
+        try run(script: contents.cString)
+    }
+}
+
+extension Installer {
+    
     private func run(command: Model.Command, plugin: Model.Plugin, result: DirectedGraph.Result, bin: AbsolutePath) throws {
         let commandLine: String
         if let path = command.path {
@@ -201,7 +210,6 @@ extension Installer {
             
             \(script)
             """
-        
         try Subprocess.run(
             arguments: ["/bin/bash", "-c", content],
             environmentBlock: environmentBlock,

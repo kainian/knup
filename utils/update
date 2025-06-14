@@ -1,0 +1,21 @@
+#!/bin/bash
+
+set -u
+
+ohai "Updating npup..."
+
+(
+    cd "${NEXT_REPOSITORY}" >/dev/null || return
+
+    LATEST_GIT_TAG="$("git" tag --list --sort="-version:refname" | head -n1)"
+    if [[ -z "${LATEST_GIT_TAG}" ]]
+    then
+        abort "Failed to query latest np Git tag."
+    fi
+    execute "git" "checkout" "--quiet" "--force" "-B" "stable" "${LATEST_GIT_TAG}"
+
+    ohai "Coping npup to ${NEXT_PREFIX}/bin..."
+
+    source "utils/make"
+    eval "install_binary npup https://github.com/nextpangea/npup/releases/download/${LATEST_GIT_TAG}/npup-universal.tar.xz"
+)
