@@ -9,7 +9,7 @@ http_head_curl() {
 
 http_get_curl() {
   # shellcheck disable=SC2086
-  execute curl -q -fL -o "$2" "$1"
+  execute curl -qsfL -o "$2" "$1"
 }
 
 http() {

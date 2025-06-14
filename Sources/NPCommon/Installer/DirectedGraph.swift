@@ -228,7 +228,7 @@ extension DirectedGraph.Result {
         if contents.isEmpty {
             return "# NOTHING"
         } else {
-            return contents.joined(separator: "\n")
+            return contents.joined(separator: "\n\n")
         }
     }
     
@@ -249,7 +249,7 @@ extension DirectedGraph.Result {
         if contents.isEmpty {
             return "# NOTHING"
         } else {
-            return contents.joined(separator: "\n")
+            return contents.joined(separator: "\n\n")
         }
     }
     
@@ -270,7 +270,7 @@ extension DirectedGraph.Result {
         if contents.isEmpty {
             return "# NOTHING"
         } else {
-            return contents.joined(separator: "\n")
+            return contents.joined(separator: "\n\n")
         }
     }
 }
@@ -316,7 +316,6 @@ extension DirectedGraph.Result {
               export NEXT_INITIALIZED_MODULES="${NEXT_INITIALIZED_MODULES:-}:\(sha256)"
               \(content.split(separator: "\n").joined(separator: "\n  "))  
             fi
-            
             """)
         }
     }

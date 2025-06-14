@@ -19,9 +19,17 @@ func main(_ arguments: [String] = CommandLine.arguments) throws {
     }
     
     let box = try setup()
-    let program = try findExecutable(arguments.removeFirst(), box)
-    arguments.insert("/bin/bash", at: 0)
-    arguments.insert(program.pathString, at: 1)
+    let name = arguments.removeFirst()
+    let program = try findExecutable(name, box)
+    
+    if let path = box?.profile {
+        arguments.insert("/usr/bin/env", at: 0)
+        arguments.insert("NEXT_SETTINGS_PROFILE_PATH=\(path)", at: 1)
+        arguments.insert(program.pathString, at: 2)
+    } else {
+        arguments.insert("/bin/bash", at: 0)
+        arguments.insert(program.pathString, at: 1)
+    }
     try Subprocess.exec(arguments: arguments)
 }
 
@@ -44,13 +52,13 @@ func setup() throws -> Sandbox.SettingsPathBox? {
     if case .none = try? box.lockfile() {
         let installer = Installer(sandbox: sandbox)
         try installer.install(box: box)
-    }
-    
-    let lock = try box.lockfile()
-    let sha256 = try box.sha256
-    if lock.sha256 != sha256 {
-        let installer = Installer(sandbox: sandbox)
-        try installer.install(box: box)
+    } else {
+        let lock = try box.lockfile()
+        let sha256 = try box.sha256
+        if lock.sha256 != sha256 {
+            let installer = Installer(sandbox: sandbox)
+            try installer.install(box: box)
+        }
     }
     return box
 }

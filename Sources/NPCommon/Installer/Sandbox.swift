@@ -182,5 +182,15 @@ extension Sandbox {
             lock = directory.appending(component: "Settings.lock")
         }
     }
+}
+
+extension Sandbox.SettingsPathBox {
     
+    public var share: AbsolutePath {
+        dir.appending(component: "share")
+    }
+    
+    public var profile: AbsolutePath {
+        share.appending(component: "profile")
+    }
 }

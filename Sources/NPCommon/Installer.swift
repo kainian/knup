@@ -47,8 +47,6 @@ extension Installer {
         }
         
         let result = try install(directedGraph, to: box.dir)
-        let share = box.dir.appending(component: "share")
-        try fileSystem.createDirectory(share, recursive: true)
         if let script = settings.script {
             var sources = """
             #!/bin/bash
@@ -59,12 +57,14 @@ extension Installer {
             \(result.sources(script))
             """
             if let content = script.content {
-                sources += "\n\(content)"
+                sources += "\n\n\(content)"
             }
             let bytes = ByteString(encodingAsUTF8: sources)
-            let profile = share.appending(component: "profile")
-            try fileSystem.writeFileContents(profile, bytes: bytes, atomically: true)
-            try fileSystem.chmod(.executable, path: profile)
+            try? fileSystem.createDirectory(box.share, recursive: true)
+            try fileSystem.writeFileContents(box.profile, bytes: bytes, atomically: true)
+            try fileSystem.chmod(.executable, path: box.profile)
+        } else {
+            try? fileSystem.removeFileTree(box.profile)
         }
         
         try YAMLEncoder.write(result.lock(settings, try box.sha256), to: box.lock)
@@ -162,6 +162,15 @@ extension Installer {
         fi
         
         \(result.commands(command))
+        
+        # init settings profile
+        if [[ "${NEXT_INITIALIZED_MODULES:-}" != *":NEXT_SETTINGS_PROFILE"* ]]; then
+            if [ -f "${NEXT_SETTINGS_PROFILE_PATH:-}" ]; then
+                export NEXT_INITIALIZED_MODULES="${NEXT_INITIALIZED_MODULES:-}:NEXT_SETTINGS_PROFILE"
+                source "$NEXT_SETTINGS_PROFILE_PATH"
+            fi
+        fi  
+        
         \("# Execute Main Command".uppercased())
         \(commandLine)
         """
