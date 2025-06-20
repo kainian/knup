@@ -46,11 +46,12 @@ extension Installer {
             directedGraph.append(try sandbox.plugin(dependency: $0))
         }
         
-        let result = try install(directedGraph, to: box.dir)
+        let result = try install0(directedGraph, to: box.dir)
+        
         if let script = settings.script {
             var sources = """
             #!/bin/bash
-
+            
             # Strict mode: Exit immediately on errors or undefined variables
             set -eu
             
@@ -76,61 +77,65 @@ extension Installer {
     public func install(_ dependency: Model.Dependency, to dirname: AbsolutePath? = nil) throws -> DirectedGraph.Result {
         let directedGraph = DirectedGraph()
         directedGraph.append(try sandbox.plugin(dependency: dependency))
-        return try install(directedGraph, to: dirname)
+        return try install0(directedGraph, to: dirname)
     }
+}
+
+extension Installer {
     
-    private func install(_ directedGraph: DirectedGraph, to dirname: AbsolutePath? = nil) throws -> DirectedGraph.Result {
+    private func install0(_ directedGraph: DirectedGraph, to dirname: AbsolutePath? = nil) throws -> DirectedGraph.Result {
         let result = try directedGraph.resolve()
         try result.forEach { node in
             let plugin = node.plugin
-            let installed = sandbox.installed(plugin)
-            if installed {
-                switch mode {
-                case .normal:
-                    Diagnostics.emit(.remark("Using \(plugin.key)"))
-                    return
-                case .direct:
-                    if directedGraph.plugins.contains(plugin) {
-                        break
-                    } else {
-                        Diagnostics.emit(.remark("Using \(plugin.key)"))
-                        return
-                    }
-                case .all:
-                    break
-                }
-            }
-            
-            Diagnostics.emit(.remark("Installing \(plugin.key)"))
-            
-            try sandbox.clean(plugin)
-            if let rubygems = plugin.rubygems {
-                let directory = sandbox.store(plugin)
-                try sandbox.fileSystem.createDirectory(directory, recursive: true)
-                let gemfile = directory.appending(component: "Gemfile")
-                let bytes = ByteString(encodingAsUTF8: rubygems.description)
-                try sandbox.fileSystem.writeFileContents(gemfile, bytes: bytes, atomically: true)
-            }
-            
-            try run(script: result.provision(plugin))
-        }
-        
-        try result.forEach { node in
-            let plugin = node.plugin
-            let additional = sandbox.additional(plugin)
-            let bin = additional.appending(component: "bin")
-            try sandbox.fileSystem.removeFileTree(bin)
-            
-            try plugin.commands?.forEach { command in
-                try run(command: command, plugin: plugin, result: result, bin: bin)
-                if let bin = dirname?.appending(component: "bin") {
-                    try run(command: command, plugin: plugin, result: result, bin: bin)
-                }
-            }
-            
-            try YAMLEncoder.write(plugin, to: additional.appending(component: "Plugin.yml"))
+            try install1(directedGraph, result, plugin, to: dirname)
         }
         return result
+    }
+    
+    private func install1(_ directedGraph: DirectedGraph, _ result: DirectedGraph.Result, _ plugin: Model.Plugin, to dirname: AbsolutePath?) throws {
+        if sandbox.installed(plugin) {
+            switch mode {
+            case .normal:
+                Diagnostics.emit(.remark("Using \(plugin.key)"))
+                return
+            case .direct:
+                if directedGraph.plugins.contains(plugin) {
+                    break
+                } else {
+                    Diagnostics.emit(.remark("Using \(plugin.key)"))
+                    return
+                }
+            case .all:
+                break
+            }
+        }
+        
+        Diagnostics.emit(.remark("Installing \(plugin.key)"))
+        
+        try sandbox.clean(plugin)
+        if let rubygems = plugin.rubygems {
+            let directory = sandbox.store(plugin)
+            try sandbox.fileSystem.createDirectory(directory, recursive: true)
+            let gemfile = directory.appending(component: "Gemfile")
+            let bytes = ByteString(encodingAsUTF8: rubygems.description)
+            try sandbox.fileSystem.writeFileContents(gemfile, bytes: bytes, atomically: true)
+        }
+        
+        try run(script: result.provision(plugin))
+        try install2(directedGraph, result, plugin, to: dirname)
+    }
+    
+    private func install2(_ directedGraph: DirectedGraph, _ result: DirectedGraph.Result, _ plugin: Model.Plugin, to dirname: AbsolutePath?) throws {
+        let additional = sandbox.additional(plugin)
+        let bin = additional.appending(component: "bin")
+        try sandbox.fileSystem.removeFileTree(bin)
+        try plugin.commands?.forEach { command in
+            try run(command: command, plugin: plugin, result: result, bin: bin)
+            if let bin = dirname?.appending(component: "bin") {
+                try run(command: command, plugin: plugin, result: result, bin: bin)
+            }
+        }
+        try YAMLEncoder.write(plugin, to: additional.appending(component: "Plugin.yml"))
     }
 }
 

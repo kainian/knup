@@ -116,5 +116,3 @@ install_binary() {
   cd "$package_name"
   execute mv * "${NEXT_PREFIX}/bin"
 }
-
-##################### END OF FUNCTIONS #####################

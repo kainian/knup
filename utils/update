@@ -17,5 +17,6 @@ ohai "Updating npup..."
     ohai "Coping npup to ${NEXT_PREFIX}/bin..."
 
     source "utils/make"
+    
     eval "install_binary npup https://github.com/nextpangea/npup/releases/download/${LATEST_GIT_TAG}/npup-universal.tar.xz"
 )
