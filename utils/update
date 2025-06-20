@@ -6,6 +6,10 @@ ohai "Updating npup..."
 
 (
     cd "${NEXT_REPOSITORY}" >/dev/null || return
+    
+    quiet_progress=("--quiet")
+    retry 5 "git" "fetch" "${quiet_progress[@]}" "--force" "origin"
+    retry 5 "git" "fetch" "${quiet_progress[@]}" "--force" "--tags" "origin"
 
     LATEST_GIT_TAG="$("git" tag --list --sort="-version:refname" | head -n1)"
     if [[ -z "${LATEST_GIT_TAG}" ]]
