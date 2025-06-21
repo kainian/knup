@@ -11,7 +11,7 @@ import ArgumentParser
 struct Command: ParsableCommand {
     
     static let configuration: CommandConfiguration = .init(
-        commandName: "np",
+        commandName: "npup",
         abstract: "The Plugin Manager",
         subcommands: [
             Init.self,

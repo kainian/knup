@@ -22,14 +22,18 @@ extension Command {
         @Option(name: .shortAndLong, help: "plugin version")
         var version: String
         
-        @Flag(name: .shortAndLong, help: "Install without checking; force overwrite if already installed.")
-        var force = false
+        @Flag(help: "Reinstall direct dependencies declared in Settings.yml.")
+        var reinstallDirect = false
+        
+        @Flag(help: "Reinstall all dependencies (including transitive dependencies).")
+        var reinstallAll = false
         
         @Flag(help: "Include extra information in the output.")
         var verbose = false
         
         func run() throws {
-            let installer = Installer(sandbox: .shared)
+            let mode = Installer.ReinstallMode(reinstallDirect, reinstallAll)
+            let installer = Installer(sandbox: .shared, mode: mode)
             let information = Model.Dependency(name, version)
             try installer.install(information)
         }

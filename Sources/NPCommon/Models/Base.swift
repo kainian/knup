@@ -34,9 +34,11 @@ extension Model {
     public struct Dependency: Codable, Sendable {
         public let name: String
         public let version: String
-        public init(_ name: String, _ version: String) {
+        public let path: String?
+        public init(_ name: String, _ version: String, _ path: String? = nil) {
             self.name = name
             self.version = version
+            self.path = path
         }
     }
     
