@@ -15,14 +15,21 @@ import struct Foundation.Data
 
 public final class Sandbox: Sendable {
     
+    /// The root directory for storing application resources and user data.
     public let home: AbsolutePath
     
+    /// The directory containing module installation metadata and bundle manifests.
     public let bundle: AbsolutePath
     
     /// The file system which we should interact with.
     public let fileSystem: FileSystem
     
+    /// Stores successfully decoded plugin models ready for runtime use.
+    nonisolated(unsafe)
+    public var decodedPlugins: [String: Model.Plugin]
+    
     private init() {
+        decodedPlugins = [:]
         fileSystem = localFileSystem
         if let path = ProcessEnv.block[.init("NEXT_PREFIX")] {
             home = try! .init(validating: path)
@@ -124,7 +131,7 @@ extension Sandbox {
         throw Error.couldNotSettings
     }
     
-    public func absolutePath(validating pathString: String) -> AbsolutePath? {
+    public func absolutePath(validating pathString: String, ) -> AbsolutePath? {
         // The path representation does not properly handle paths on all
         // platforms.  On Windows, we often see an empty key which we would
         // like to treat as being the relative path to cwd.
@@ -137,7 +144,6 @@ extension Sandbox {
         }
     }
 }
-
 
 extension Sandbox.SettingsPathBox {
     

@@ -42,6 +42,11 @@ extension Installer {
     public func install(box: Sandbox.SettingsPathBox) throws -> DirectedGraph.Result {
         let directedGraph = DirectedGraph()
         let settings = try box.settings()
+        
+        try settings.plugins?.forEach {
+            try sandbox.localPlugin(dependency: $0, pathBox: box)
+        }
+        
         try settings.plugins?.forEach {
             directedGraph.append(try sandbox.plugin(dependency: $0))
         }

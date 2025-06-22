@@ -7,6 +7,7 @@
 
 import class Yams.YAMLDecoder
 import struct TSCBasic.RelativePath
+import struct TSCBasic.AbsolutePath
 
 extension Model.Plugin {
     
@@ -30,7 +31,6 @@ extension Model.Plugin {
             return true
         }
     }
-    
 }
 
 extension Model.Plugin: Hashable {
@@ -47,13 +47,40 @@ extension Model.Plugin: Hashable {
 
 extension Sandbox {
     
-    private func relativePath(_ dependency: Model.Dependency) throws -> RelativePath {
-        try RelativePath(validating: "utils/plugins/\(dependency.name)/\(dependency.version)/Plugin.yml")
+    @discardableResult
+    public func localPlugin(dependency: Model.Dependency, pathBox: SettingsPathBox) throws -> Model.Plugin? {
+        func resolvingPath(validating pathString: String) throws -> AbsolutePath {
+            if let abs = try? AbsolutePath(validating: pathString) {
+                return abs
+            } else {
+                let rela = try RelativePath(validating: pathString)
+                return pathBox.dir.appending(rela)
+            }
+        }
+        guard let path = dependency.path else {
+            return nil
+        }
+        let absolutePath = try resolvingPath(validating: path)
+        let plugin = try YAMLDecoder.decode(Model.Plugin.self, from: absolutePath)
+        
+        let key = "\(plugin.name)@\(plugin.version)"
+        decodedPlugins[key] = plugin
+        return plugin
     }
     
     public func plugin(dependency: Model.Dependency) throws -> Model.Plugin {
-        let relativePath = try relativePath(dependency)
-        let absolutePath = bundle.appending(relativePath)
-        return try YAMLDecoder.decode(Model.Plugin.self, from: absolutePath)
+        func relativePath(_ dependency: Model.Dependency) throws -> RelativePath {
+            try RelativePath(validating: "utils/plugins/\(dependency.name)/\(dependency.version)/Plugin.yml")
+        }
+        let key = "\(dependency.name)@\(dependency.version)"
+        if let plugin = decodedPlugins[key] {
+            return plugin
+        } else {
+            let relativePath = try relativePath(dependency)
+            let absolutePath = bundle.appending(relativePath)
+            let plugin =  try YAMLDecoder.decode(Model.Plugin.self, from: absolutePath)
+            decodedPlugins[key] = plugin
+            return plugin
+        }
     }
 }
