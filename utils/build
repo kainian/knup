@@ -1,0 +1,12 @@
+#!/bin/bash
+
+(
+    swift build -c release --arch arm64 --arch x86_64
+    cd .build/apple/Products/Release
+    rm -rf npup-universal.tar.xz npup-universal
+    mkdir npup-universal
+    cp np npup-universal/np
+    cp npup npup-universal/npup
+    tar -cJvf npup-universal.tar.xz npup-universal
+    echo "write: npup-universal.tar.xz"
+)
