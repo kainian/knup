@@ -156,14 +156,22 @@ extension Installer {
 extension Installer {
     
     private func run(command: Model.Command, plugin: Model.Plugin, result: DirectedGraph.Result, bin: AbsolutePath) throws {
+        let commandLineArgs: String
+        if let args = command.args {
+            commandLineArgs = args.map {
+                "\"\($0)\""
+            }.joined(separator: " ") + " " + "\"$@\""
+        } else {
+            commandLineArgs = "\"$@\""
+        }
         let commandLine: String
         if let path = command.path {
             commandLine = """
-            exec "${NEXT_PREFIX}/\(sandbox.relative(plugin))/\(path)" "$@"
+            exec "${NEXT_PREFIX}/\(sandbox.relative(plugin))/\(path)" \(commandLineArgs)
             """
         } else {
             commandLine = """
-            exec \(command.name) "$@"
+            exec \(command.name) \(commandLineArgs)
             """
         }
         

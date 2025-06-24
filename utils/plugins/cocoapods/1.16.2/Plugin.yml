@@ -51,7 +51,10 @@ commands:
       - plugin: cocoapods
         name: init  
   - name: pod
-    path: bin/pod
+    path: bundle
+    args: 
+      - exec
+      - pod
     description: |
       CocoaPods is a dependency manager for Swift and Objective-C Cocoa projects. 
       It has over 104 thousand libraries and is used in over 3 million apps. 
