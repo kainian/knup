@@ -21,6 +21,7 @@ extension Model {
     public struct Command: Codable, Sendable {
         public let name: String
         public let path: String?
+        public let cmd: String?
         public let args: [String]?
         public let description: String?
         public let prepare: [Prepare]?

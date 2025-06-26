@@ -188,9 +188,13 @@ extension Installer {
             commandLine = """
             exec "${NEXT_PREFIX}/\(sandbox.relative(plugin))/\(path)" \(commandLineArgs)
             """
+        } else if let cmd = command.cmd {
+            commandLine = """
+            exec "\(cmd)" \(commandLineArgs)
+            """
         } else {
             commandLine = """
-            exec \(command.name) \(commandLineArgs)
+            exec "\(command.name)" \(commandLineArgs)
             """
         }
         

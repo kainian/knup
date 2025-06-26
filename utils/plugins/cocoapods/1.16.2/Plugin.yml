@@ -19,16 +19,16 @@ rubygems:
 bootstraps:
   - name: init
     content: |
-        export GEM_HOME="$NEXT_PREFIX/Gems/cocoapods@1.16.2"
-        export GEM_PATH="$NEXT_PREFIX/Gems/cocoapods@1.16.2"
-        export BUNDLE_GEMFILE="$GEM_HOME/Gemfile"
+      export GEM_HOME="$NEXT_PREFIX/Gems/cocoapods@1.16.2"
+      export GEM_PATH="$NEXT_PREFIX/Gems/cocoapods@1.16.2"
+      export BUNDLE_GEMFILE="$GEM_HOME/Gemfile"
     prepare:
       - plugin: ruby
         name: shell
 provisions:
   - name: install
     content: |
-        ${RBENV_ROOT}/shims/bundle install
+      ${RBENV_ROOT}/shims/bundle install
     prepare:
       - plugin: cocoapods
         name: init
@@ -51,8 +51,8 @@ commands:
       - plugin: cocoapods
         name: init  
   - name: pod
-    path: bundle
-    args: 
+    cmd: bundle
+    args:
       - exec
       - pod
     description: |
