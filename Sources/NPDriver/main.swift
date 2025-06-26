@@ -44,32 +44,25 @@ func setup() throws -> Sandbox.SettingsPathBox? {
         return nil
     }
     
+    let installer = Installer(sandbox: sandbox)
     if !fileSystem.isFile(box.lock) {
-        let installer = Installer(sandbox: sandbox)
         try installer.install(box: box)
-    }
-    
-    if case .none = try? box.lockfile() {
-        let installer = Installer(sandbox: sandbox)
+    } else if case .none = try? box.lockfile() {
         try installer.install(box: box)
     } else {
-        let lock = try box.lockfile()
-        let sha256 = try box.sha256
-        if lock.sha256 != sha256 {
-            let installer = Installer(sandbox: sandbox)
-            try installer.install(box: box)
-        }
+        try installer.check(box: box)
     }
     return box
 }
 
 func findExecutable(_ program: String, _ box: Sandbox.SettingsPathBox?) throws -> AbsolutePath {
-    if let abs = box?.dir.appending(components: ["bin", program]) {
+    let sandbox = Sandbox.shared
+    let fileSystem = sandbox.fileSystem
+    if let abs = box?.dir.appending(components: ["bin", program]),
+        fileSystem.isFile(abs) {
         return abs
     }
     
-    let sandbox = Sandbox.shared
-    let fileSystem = sandbox.fileSystem
     let additional = sandbox.additional(nil)
     for type in try fileSystem.getDirectoryContents(additional) {
         let dirname = additional.appending(component: type)

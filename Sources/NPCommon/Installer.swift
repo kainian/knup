@@ -37,22 +37,26 @@ public final class Installer {
 }
 
 extension Installer {
-    
+        
     @discardableResult
     public func install(box: Sandbox.SettingsPathBox) throws -> DirectedGraph.Result {
-        let directedGraph = DirectedGraph()
-        let settings = try box.settings()
-        
-        try settings.plugins?.forEach {
-            try sandbox.localPlugin(dependency: $0, pathBox: box)
-        }
-        
-        try settings.plugins?.forEach {
-            directedGraph.append(try sandbox.plugin(dependency: $0))
-        }
-        
-        let result = try install0(directedGraph, to: box.dir)
-        
+        let (graph, result, settings) = try generate(box: box)
+        return try install(box: box, graph, result, settings)
+    }
+    
+    @discardableResult
+    public func install(_ dependency: Model.Dependency, to dirname: AbsolutePath? = nil) throws -> DirectedGraph.Result {
+        let graph = DirectedGraph()
+        graph.append(try sandbox.plugin(dependency: dependency))
+        let result = try graph.resolve()
+        return try install0(graph, result, to: dirname)
+    }
+}
+
+extension Installer {
+
+    private func install(box: Sandbox.SettingsPathBox, _ graph: DirectedGraph, _ result: DirectedGraph.Result, _ settings: Model.Settings) throws -> DirectedGraph.Result {
+        let result = try install0(graph, result, to: box.dir)
         if let script = settings.script {
             var sources = """
             #!/bin/bash
@@ -78,18 +82,7 @@ extension Installer {
         return result
     }
     
-    @discardableResult
-    public func install(_ dependency: Model.Dependency, to dirname: AbsolutePath? = nil) throws -> DirectedGraph.Result {
-        let directedGraph = DirectedGraph()
-        directedGraph.append(try sandbox.plugin(dependency: dependency))
-        return try install0(directedGraph, to: dirname)
-    }
-}
-
-extension Installer {
-    
-    private func install0(_ directedGraph: DirectedGraph, to dirname: AbsolutePath? = nil) throws -> DirectedGraph.Result {
-        let result = try directedGraph.resolve()
+    private func install0(_ directedGraph: DirectedGraph, _ result: DirectedGraph.Result, to dirname: AbsolutePath? = nil) throws -> DirectedGraph.Result {
         try result.forEach { node in
             let plugin = node.plugin
             try install1(directedGraph, result, plugin, to: dirname)
@@ -145,6 +138,27 @@ extension Installer {
 }
 
 extension Installer {
+    
+    public func check(box: Sandbox.SettingsPathBox) throws {
+        let lock = try box.lockfile()
+        let sha256 = try box.sha256
+        if lock.sha256 != sha256 {
+            let installer = Installer(sandbox: sandbox)
+            try installer.install(box: box)
+        } else {
+            let (graph, result, settings) = try generate(box: box)
+            var installed = true
+            result.forEach { node in
+                let plugin = node.plugin
+                if !sandbox.installed(plugin) {
+                    installed = false
+                }
+            }
+            if !installed {
+                _ = try install(box: box, graph, result, settings)
+            }
+        }
+    }
     
     public func update() throws {
         let path = sandbox.bundle.appending(components: ["utils", "update"])
@@ -232,6 +246,21 @@ extension Installer {
             arguments: ["/bin/bash", "-c", content],
             environmentBlock: environmentBlock,
             startNewProcessGroup: false)
+    }
+}
+
+extension Installer {
+    
+    func generate(box: Sandbox.SettingsPathBox) throws -> (graph: DirectedGraph, result: DirectedGraph.Result, settings: Model.Settings) {
+        let graph = DirectedGraph()
+        let settings = try box.settings()
+        try settings.plugins?.forEach {
+            try sandbox.localPlugin(dependency: $0, pathBox: box)
+        }
+        try settings.plugins?.forEach {
+            graph.append(try sandbox.plugin(dependency: $0))
+        }
+        return (graph, try graph.resolve(), settings)
     }
 }
 
