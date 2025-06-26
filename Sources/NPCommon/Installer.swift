@@ -37,19 +37,19 @@ public final class Installer {
 }
 
 extension Installer {
-        
-    @discardableResult
-    public func install(box: Sandbox.SettingsPathBox) throws -> DirectedGraph.Result {
-        let (graph, result, settings) = try generate(box: box)
-        return try install(box: box, graph, result, settings)
-    }
-    
+     
     @discardableResult
     public func install(_ dependency: Model.Dependency, to dirname: AbsolutePath? = nil) throws -> DirectedGraph.Result {
         let graph = DirectedGraph()
         graph.append(try sandbox.plugin(dependency: dependency))
         let result = try graph.resolve()
         return try install0(graph, result, to: dirname)
+    }
+    
+    @discardableResult
+    public func install(box: Sandbox.SettingsPathBox) throws -> DirectedGraph.Result {
+        let (graph, result, settings) = try generate(box: box)
+        return try install(box: box, graph, result, settings)
     }
 }
 
@@ -75,6 +75,14 @@ extension Installer {
             try fileSystem.chmod(.executable, path: box.profile)
         } else {
             try? fileSystem.removeFileTree(box.profile)
+        }
+        
+        let bin = box.dir.appending(component: "bin")
+        try result.forEach { node in
+            let plugin = node.plugin
+            try plugin.commands?.forEach { command in
+                try write(command: command, plugin: plugin, result: result, bin: bin)
+            }
         }
         
         try YAMLEncoder.write(result.lock(settings, try box.sha256), to: box.lock)
@@ -128,10 +136,7 @@ extension Installer {
         let bin = additional.appending(component: "bin")
         try sandbox.fileSystem.removeFileTree(bin)
         try plugin.commands?.forEach { command in
-            try run(command: command, plugin: plugin, result: result, bin: bin)
-            if let bin = dirname?.appending(component: "bin") {
-                try run(command: command, plugin: plugin, result: result, bin: bin)
-            }
+            try write(command: command, plugin: plugin, result: result, bin: bin)
         }
         try YAMLEncoder.write(plugin, to: additional.appending(component: "Plugin.yml"))
     }
@@ -169,7 +174,7 @@ extension Installer {
 
 extension Installer {
     
-    private func run(command: Model.Command, plugin: Model.Plugin, result: DirectedGraph.Result, bin: AbsolutePath) throws {
+    private func write(command: Model.Command, plugin: Model.Plugin, result: DirectedGraph.Result, bin: AbsolutePath) throws {
         let commandLineArgs: String
         if let args = command.args {
             commandLineArgs = args.map {
