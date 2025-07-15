@@ -10,6 +10,11 @@ let package = Package(
     ],
     products: [
         .library(
+            name: "NPOptions",
+            targets: [
+                "NPOptions"
+            ]),
+        .library(
             name: "NPCommon",
             targets: [
                 "NPCommon"
@@ -31,6 +36,8 @@ let package = Package(
         .package(url: "https://github.com/jpsim/Yams.git", exact: "5.4.0"),
     ],
     targets: [
+        .target(
+            name: "NPOptions"),
         .target(
             name: "NPCommon",
             dependencies: [
