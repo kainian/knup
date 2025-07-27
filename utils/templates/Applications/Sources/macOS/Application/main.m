@@ -1,6 +1,6 @@
 //
 //  main.m
-//  NP_TEMPLATE_MACOS_NAME
+//  KN_TEMPLATE_MACOS_NAME
 //
 //  Created by Jonathan Lee on 6/16/25.
 //

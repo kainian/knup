@@ -4,30 +4,30 @@
 import PackageDescription
 
 let package = Package(
-    name: "NextPangeaSetup",
+    name: "KainianSetup",
     platforms: [
         .macOS(.v13)
     ],
     products: [
         .library(
-            name: "NPOptions",
+            name: "KNOptions",
             targets: [
-                "NPOptions"
+                "KNOptions"
             ]),
         .library(
-            name: "NPCommon",
+            name: "KNCommon",
             targets: [
-                "NPCommon"
+                "KNCommon"
             ]),
         .executable(
-            name: "npup",
+            name: "knup",
             targets: [
-                "NPSetup"
+                "KNSetup"
             ]),
         .executable(
-            name: "np",
+            name: "kn",
             targets: [
-                "NPDriver"
+                "KNDriver"
             ])
     ],
     dependencies: [
@@ -37,23 +37,23 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "NPOptions"),
+            name: "KNOptions"),
         .target(
-            name: "NPCommon",
+            name: "KNCommon",
             dependencies: [
                 .product(name: "Yams", package: "Yams"),
                 .product(name: "TSCBasic", package: "swift-tools-support-core"),
             ]),
         .executableTarget(
-            name: "NPSetup",
+            name: "KNSetup",
             dependencies: [
-                "NPCommon",
+                "KNCommon",
                 .product(name: "ArgumentParser", package: "swift-argument-parser")
             ]),
         .executableTarget(
-            name: "NPDriver",
+            name: "KNDriver",
             dependencies: [
-                "NPCommon"
+                "KNCommon"
             ]),
     ]
 )

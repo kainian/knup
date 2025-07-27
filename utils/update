@@ -2,7 +2,7 @@
 
 set -u
 
-ohai "Updating npup..."
+ohai "Updating knup..."
 
 (
     cd "${NEXT_REPOSITORY}" >/dev/null || return
@@ -14,13 +14,13 @@ ohai "Updating npup..."
     LATEST_GIT_TAG="$("git" tag --list --sort="-version:refname" | head -n1)"
     if [[ -z "${LATEST_GIT_TAG}" ]]
     then
-        abort "Failed to query latest np Git tag."
+        abort "Failed to query latest kn Git tag."
     fi
     execute "git" "checkout" "--quiet" "--force" "-B" "stable" "${LATEST_GIT_TAG}"
 
-    ohai "Coping npup to ${NEXT_PREFIX}/bin..."
+    ohai "Coping knup to ${NEXT_PREFIX}/bin..."
 
     source "utils/make"
     
-    eval "install_binary npup https://github.com/nextpangea/npup/releases/download/${LATEST_GIT_TAG}/npup-universal.tar.xz"
+    eval "install_binary knup https://github.com/kainian/knup/releases/download/${LATEST_GIT_TAG}/knup-universal.tar.xz"
 )

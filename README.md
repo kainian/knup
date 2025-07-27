@@ -1,2 +1,2 @@
-NextPangea Setup
+Kainian Setup
 ===
