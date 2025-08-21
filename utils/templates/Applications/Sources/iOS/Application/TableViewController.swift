@@ -1,6 +1,6 @@
 //
 //  TableViewController.swift
-//  KN_TEMPLATE_IOS_NAME
+//  NP_TEMPLATE_IOS_NAME
 //
 //  Created by Jonathan Lee on 6/16/25.
 //

@@ -374,7 +374,7 @@ xcuserdata
 /*.gcno
 **/xcshareddata/WorkspaceSettings.xcsettings
 
-# KNUP Global Settings
+# NPUP Global Settings
 Settings.yml
 
 # End of https://www.toptal.com/developers/gitignore/api/clion,macos,swift,xcode,objective-c,visualstudiocode,swiftpackagemanager,cocoapods,carthage,ruby

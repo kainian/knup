@@ -116,7 +116,7 @@ elif [[ "${OS}" == "Darwin" ]]
 then
   NEXT_ON_MACOS=1
 else
-  abort "KN is only supported on macOS and Linux."
+  abort "NP is only supported on macOS and Linux."
 fi
 
 if [[ -n "${NEXT_ON_MACOS-}" ]]
@@ -125,11 +125,11 @@ then
 
   if [[ "${UNAME_MACHINE}" == "arm64" ]]
   then
-    NEXT_PREFIX="/opt/kn"
+    NEXT_PREFIX="/opt/np"
   else
-    NEXT_PREFIX="/usr/local/kn"
+    NEXT_PREFIX="/usr/local/np"
   fi
-  NEXT_REPOSITORY="${NEXT_PREFIX}/.knup"
+  NEXT_REPOSITORY="${NEXT_PREFIX}/.npup"
 
   STAT_PRINTF=("/usr/bin/stat" "-f")
   PERMISSION_FORMAT="%A"
@@ -141,8 +141,8 @@ then
 else
   UNAME_MACHINE="$(uname -m)"
   
-  NEXT_PREFIX="/home/kn"
-  NEXT_REPOSITORY="${NEXT_PREFIX}/.knup"
+  NEXT_PREFIX="/home/np"
+  NEXT_REPOSITORY="${NEXT_PREFIX}/.npup"
 
   STAT_PRINTF=("/usr/bin/stat" "--printf")
   PERMISSION_FORMAT="%a"
@@ -154,7 +154,7 @@ else
 fi
 CHMOD=("/bin/chmod")
 MKDIR=("/bin/mkdir" "-p")
-NEXT_GIT_REMOTE="https://github.com/kainian/knup.git"
+NEXT_GIT_REMOTE="https://github.com/nextpangea/npup.git"
 
 # unset this from the environment
 unset HAVE_SUDO_ACCESS 
@@ -321,7 +321,7 @@ which() {
 
 
 directories=(
-  .knup
+  .npup
   bin etc lib sbin share var opt
   Cellar Caskroom Frameworks Gems
 )
@@ -349,7 +349,7 @@ then
 fi
 execute_sudo "${CHOWN[@]}" "-R" "${USER}:${GROUP}" "${NEXT_REPOSITORY}"
 
-ohai "Downloading and installing knup..."
+ohai "Downloading and installing npup..."
 (
     cd "${NEXT_REPOSITORY}" >/dev/null || return
 
@@ -380,16 +380,16 @@ ohai "Downloading and installing knup..."
     LATEST_GIT_TAG="$("git" tag --list --sort="-version:refname" | head -n1)"
     if [[ -z "${LATEST_GIT_TAG}" ]]
     then
-        abort "Failed to query latest kn Git tag."
+        abort "Failed to query latest np Git tag."
     fi
     execute "git" "checkout" "--quiet" "--force" "-B" "stable" "${LATEST_GIT_TAG}"
 
-    ohai "Coping knup to ${NEXT_PREFIX}/bin..."
+    ohai "Coping npup to ${NEXT_PREFIX}/bin..."
 
     source "utils/make"
-    eval "install_binary knup https://github.com/kainian/knup/releases/download/${LATEST_GIT_TAG}/knup-universal.tar.xz"
-    execute_sudo "ln" "-sf" "${NEXT_PREFIX}/bin/knup" "/usr/local/bin/knup" 
-    execute_sudo "ln" "-sf" "${NEXT_PREFIX}/bin/kn" "/usr/local/bin/kn"
+    eval "install_binary npup https://github.com/nextpangea/npup/releases/download/${LATEST_GIT_TAG}/npup-universal.tar.xz"
+    execute_sudo "ln" "-sf" "${NEXT_PREFIX}/bin/npup" "/usr/local/bin/npup" 
+    execute_sudo "ln" "-sf" "${NEXT_PREFIX}/bin/np" "/usr/local/bin/np"
 )
 
 ohai "Installation successful!"

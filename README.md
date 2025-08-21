@@ -1,4 +1,4 @@
-Kainian Setup
+NextPangea Setup
 ===
 
 # Installation

@@ -3,10 +3,10 @@
 (
     swift build -c release --arch arm64 --arch x86_64
     cd .build/apple/Products/Release
-    rm -rf knup-universal.tar.xz knup-universal
-    mkdir knup-universal
-    cp kn knup-universal/kn
-    cp knup knup-universal/knup
-    tar -cJvf knup-universal.tar.xz knup-universal
-    echo "write: knup-universal.tar.xz"
+    rm -rf npup-universal.tar.xz npup-universal
+    mkdir npup-universal
+    cp np npup-universal/np
+    cp npup npup-universal/npup
+    tar -cJvf npup-universal.tar.xz npup-universal
+    echo "write: npup-universal.tar.xz"
 )

@@ -1,6 +1,6 @@
 //
 //  MainView.swift
-//  KN_TEMPLATE_MACOS_NAME
+//  NP_TEMPLATE_MACOS_NAME
 //
 //  Created by Jonathan Lee on 6/16/25.
 //

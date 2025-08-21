@@ -374,7 +374,7 @@ xcuserdata
 /*.gcno
 **/xcshareddata/WorkspaceSettings.xcsettings
 
-# KNUP Examples
+# NPUP Examples
 bin/
 share/
 Settings.lock
