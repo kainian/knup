@@ -55,5 +55,11 @@ let package = Package(
             dependencies: [
                 "NPCommon"
             ]),
+        
+        .testTarget(
+            name: "NPCommonTests",
+            dependencies: [
+                "NPCommon"
+            ]),
     ]
 )
